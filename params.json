@@ -196,6 +196,66 @@
         "ORGAN"
       ],
       "default": 0
+    },
+    {
+      "key": "lfo2_rate",
+      "name": "LFO 2 Rate",
+      "min": 0.01,
+      "max": 20,
+      "default": 0.5,
+      "unit": "Hz"
+    },
+    {
+      "key": "lfo2_depth",
+      "name": "LFO 2 Depth",
+      "min": 0,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "lfo2_target",
+      "name": "LFO 2 Target",
+      "options": [
+        "OFF",
+        "FILTER",
+        "LEVEL"
+      ],
+      "default": 0
+    },
+    {
+      "key": "filter_env_amount",
+      "name": "Filter Env Amt",
+      "min": -1,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "filter_env_attack",
+      "name": "Filter Attack",
+      "min": 0.001,
+      "max": 10,
+      "default": 0.01
+    },
+    {
+      "key": "filter_env_decay",
+      "name": "Filter Decay",
+      "min": 0.001,
+      "max": 10,
+      "default": 0.2
+    },
+    {
+      "key": "filter_env_sustain",
+      "name": "Filter Sustain",
+      "min": 0,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "filter_env_release",
+      "name": "Filter Release",
+      "min": 0.001,
+      "max": 10,
+      "default": 0.2
     }
   ]
 }
