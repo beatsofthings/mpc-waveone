@@ -475,6 +475,123 @@
       "min": -1,
       "max": 1,
       "default": -0.3826834323650904
+    },
+    {
+      "key": "osc1_engine",
+      "name": "OSC 1 Type",
+      "options": [
+        "WAVETABLE",
+        "GRANULAR",
+        "ANALOG",
+        "FM"
+      ],
+      "default": 0
+    },
+    {
+      "key": "osc1_va_pw",
+      "name": "OSC 1 Pulse Width",
+      "min": 0.05,
+      "max": 0.95,
+      "default": 0.5
+    },
+    {
+      "key": "osc1_va_detune",
+      "name": "OSC 1 VA Detune",
+      "min": 0,
+      "max": 1,
+      "default": 0.08
+    },
+    {
+      "key": "osc1_fm_ratio",
+      "name": "OSC 1 FM Ratio",
+      "min": 0.25,
+      "max": 16,
+      "default": 2
+    },
+    {
+      "key": "osc1_fm_index",
+      "name": "OSC 1 FM Index",
+      "min": 0,
+      "max": 12,
+      "default": 1
+    },
+    {
+      "key": "osc2_engine",
+      "name": "OSC 2 Type",
+      "options": [
+        "WAVETABLE",
+        "GRANULAR",
+        "ANALOG",
+        "FM"
+      ],
+      "default": 0
+    },
+    {
+      "key": "osc2_va_pw",
+      "name": "OSC 2 Pulse Width",
+      "min": 0.05,
+      "max": 0.95,
+      "default": 0.5
+    },
+    {
+      "key": "osc2_va_detune",
+      "name": "OSC 2 VA Detune",
+      "min": 0,
+      "max": 1,
+      "default": 0.08
+    },
+    {
+      "key": "osc2_fm_ratio",
+      "name": "OSC 2 FM Ratio",
+      "min": 0.25,
+      "max": 16,
+      "default": 2
+    },
+    {
+      "key": "osc2_fm_index",
+      "name": "OSC 2 FM Index",
+      "min": 0,
+      "max": 12,
+      "default": 1
+    },
+    {
+      "key": "osc3_engine",
+      "name": "OSC 3 Type",
+      "options": [
+        "WAVETABLE",
+        "GRANULAR",
+        "ANALOG",
+        "FM"
+      ],
+      "default": 0
+    },
+    {
+      "key": "osc3_va_pw",
+      "name": "OSC 3 Pulse Width",
+      "min": 0.05,
+      "max": 0.95,
+      "default": 0.5
+    },
+    {
+      "key": "osc3_va_detune",
+      "name": "OSC 3 VA Detune",
+      "min": 0,
+      "max": 1,
+      "default": 0.08
+    },
+    {
+      "key": "osc3_fm_ratio",
+      "name": "OSC 3 FM Ratio",
+      "min": 0.25,
+      "max": 16,
+      "default": 2
+    },
+    {
+      "key": "osc3_fm_index",
+      "name": "OSC 3 FM Index",
+      "min": 0,
+      "max": 12,
+      "default": 1
     }
   ]
 }
