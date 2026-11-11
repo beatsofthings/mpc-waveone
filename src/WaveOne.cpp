@@ -61,6 +61,8 @@ void Synth::setOscLevel(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && 
 void Synth::setOscTune(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) oscTune_[osc] = std::max(-24.0f, std::min(x, 24.0f)); }
 void Synth::setOscEnabled(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) oscEnabled_[osc] = x >= 0.5f ? 1.0f : 0.0f; }
 void Synth::setSubLevel(float x) noexcept { if (std::isfinite(x)) subLevel_ = clamp01(x); }
+void Synth::setFilterMode(float x) noexcept { if(std::isfinite(x)) filterMode_=std::max(0,std::min(4,static_cast<int>(std::lround(x)))); }
+void Synth::setFilterQ(float x) noexcept { if(std::isfinite(x)) filterQ_=std::max(0.5f,std::min(x,12.0f)); }
 void Synth::setFilterCutoff(float x) noexcept { if (std::isfinite(x)) cutoff_ = std::max(30.0f, std::min(x, 18000.0f)); }
 void Synth::setFilterResonance(float x) noexcept { if (std::isfinite(x)) resonance_ = clamp01(x); }
 void Synth::setLfoRate(float x) noexcept { if (std::isfinite(x)) lfoRate_ = std::max(0.01f, std::min(x, 20.0f)); }
@@ -258,9 +260,22 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
             else if (v.stage == Voice::Release) v.filterEnv = std::max(0.0f, v.filterEnv - v.filterReleaseStep);
             const float mod = filterEnvAmount_ * v.filterEnv + (lfo2Target_ == 1 ? lfo2 : 0.0f) + lfo3 + lfo4 + matrixCutoff;
             const float effectiveCutoff = std::max(30.0f, std::min(18000.0f, cutoff_ * std::pow(2.0f, 5.0f * mod)));
-            const float alpha = static_cast<float>(1.0 - std::exp(-2.0 * pi * effectiveCutoff / sampleRate_));
-            v.filterState += alpha * (input - v.filterState);
-            mixed += v.filterState * v.env * v.velocity * std::max(0.0f,1.0f+matrixLevel);
+            // Topology-preserving two-integrator state-variable filter (LP/BP/HP/Notch/Peak).
+            const float safeHz=std::min(effectiveCutoff,static_cast<float>(sampleRate_*0.45));
+            const float g=static_cast<float>(std::tan(pi*safeHz/sampleRate_));
+            const float k=1.0f/filterQ_;
+            const float a1=1.0f/(1.0f+g*(g+k));
+            const float v1=(v.filterIc1+g*(input-v.filterIc2))*a1;
+            const float v2=v.filterIc2+g*v1;
+            v.filterIc1=2.0f*v1-v.filterIc1;
+            v.filterIc2=2.0f*v2-v.filterIc2;
+            const float lp=v2, bp=v1, hp=input-k*bp-lp;
+            float filtered=lp;
+            if(filterMode_==1) filtered=bp;
+            else if(filterMode_==2) filtered=hp;
+            else if(filterMode_==3) filtered=lp+hp;
+            else if(filterMode_==4) filtered=lp-hp;
+            mixed += filtered * v.env * v.velocity * std::max(0.0f,1.0f+matrixLevel);
         }
         const float output = std::max(-1.0f, std::min(mixed * gain_, 1.0f));
         left[i] = output;
