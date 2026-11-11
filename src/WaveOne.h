@@ -47,6 +47,7 @@ public:
     void setVaDetune(int osc, float semitones) noexcept;
     void setFmRatio(int osc, float ratio) noexcept;
     void setFmIndex(int osc, float index) noexcept;
+    void setGrainParameter(int osc, int parameter, float value) noexcept;
     void setGrainSize(float ms) noexcept;
     void setGrainDensity(float hz) noexcept;
     void setGrainPosition(float position) noexcept;
@@ -81,6 +82,7 @@ private:
     std::array<float,3> fmRatio_{{2.0f,2.0f,2.0f}};
     std::array<float,3> fmIndex_{{1.0f,1.0f,1.0f}};
     std::array<float,kTableSize> grainSource_{};
+    std::array<std::array<float,7>,3> grainParams_{{{{100,12,0.5f,0,0,0,1}},{{100,12,0.5f,0,0,0,1}},{{100,12,0.5f,0,0,0,1}}}};
     float grainSize_ = 100.0f, grainDensity_ = 12.0f, grainPosition_ = 0.5f;
     float grainSpray_ = 0.0f, grainPitch_ = 0.0f, grainReverse_ = 0.0f, grainMix_ = 1.0f;
     float subLevel_ = 0.0f, cutoff_ = 18000.0f, resonance_ = 0.0f;
