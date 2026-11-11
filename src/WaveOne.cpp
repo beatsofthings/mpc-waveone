@@ -2,6 +2,60 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <cstdio>
+#include <vector>
+#include <cstring>
+
+
+// Minimal bounded PCM WAV reader: RIFF/WAVE, mono/stereo, PCM16, PCM24 or IEEE float32.
+// Decode only during initialization, never from render().
+namespace {
+unsigned rd16(const unsigned char* p) { return unsigned(p[0])|(unsigned(p[1])<<8); }
+unsigned rd32(const unsigned char* p) { return rd16(p)|(rd16(p+2)<<16); }
+bool readWav(const char* path, std::array<float, waveone::Synth::kTableSize>& output) {
+    if (!path) return false;
+    FILE* f=std::fopen(path,"rb"); if(!f) return false;
+    unsigned char header[12];
+    if(std::fread(header,1,12,f)!=12 || std::memcmp(header,"RIFF",4)!=0 || std::memcmp(header+8,"WAVE",4)!=0) {std::fclose(f);return false;}
+    unsigned fmt=0,ch=0,bits=0; std::vector<unsigned char> bytes;
+    for(int chunk=0;chunk<128;++chunk) {
+        unsigned char h[8]; if(std::fread(h,1,8,f)!=8) break;
+        const unsigned size=rd32(h+4);
+        if(size>16*1024*1024) break;
+        if(std::memcmp(h,"fmt ",4)==0 && size>=16 && size<=256) {
+            unsigned char b[256]; if(std::fread(b,1,size,f)!=size) break;
+            fmt=rd16(b); ch=rd16(b+2); bits=rd16(b+14);
+        } else if(std::memcmp(h,"data",4)==0 && size>0) {
+            bytes.resize(size); if(std::fread(bytes.data(),1,size,f)!=size) bytes.clear();
+        } else if(std::fseek(f,static_cast<long>(size),SEEK_CUR)!=0) break;
+        if(size&1u) std::fseek(f,1,SEEK_CUR);
+        if(!bytes.empty() && fmt) break;
+    }
+    std::fclose(f);
+    const unsigned bps=bits/8;
+    if(!((fmt==1 && (bits==16||bits==24))||(fmt==3&&bits==32)) || (ch!=1&&ch!=2) || bps==0) return false;
+    const size_t frames=bytes.size()/(bps*ch);
+    if(frames<16) return false;
+    auto sample=[&](size_t i) -> float {
+        const unsigned char* p=bytes.data()+i*bps*ch;
+        float v=0;
+        if(fmt==3) { std::memcpy(&v,p,4); if(!std::isfinite(v)) v=0; }
+        else if(bits==16) { const int raw=static_cast<int>(rd16(p)); v=static_cast<float>(raw>=32768?raw-65536:raw)/32768.0f; }
+        else { int raw=int(p[0])|(int(p[1])<<8)|(int(p[2])<<16); if(raw&0x800000) raw-=0x1000000; v=raw/8388608.0f; }
+        return std::max(-1.0f,std::min(v,1.0f));
+    };
+    float peak=0;
+    for(int i=0;i<waveone::Synth::kTableSize;++i) {
+        const double src=static_cast<double>(i)*(frames-1)/(waveone::Synth::kTableSize-1);
+        const size_t a=static_cast<size_t>(src),b=std::min(a+1,frames-1);
+        const float frac=static_cast<float>(src-a);
+        output[i]=sample(a)*(1-frac)+sample(b)*frac;
+        peak=std::max(peak,std::abs(output[i]));
+    }
+    if(peak>0.0001f) for(auto& v:output) v/=peak;
+    return true;
+}
+}
 
 namespace waveone {
 namespace {
@@ -70,7 +124,10 @@ void Synth::setLfoDepth(float x) noexcept { if (std::isfinite(x)) lfoDepth_ = st
 void Synth::setWtWarpMode(int osc, float x) noexcept { if(osc>=0&&osc<3&&std::isfinite(x)) wtWarpMode_[osc]=std::max(0,std::min(5,static_cast<int>(std::lround(x)))); }
 void Synth::setWtWarpAmount(int osc, float x) noexcept { if(osc>=0&&osc<3&&std::isfinite(x)) wtWarpAmount_[osc]=clamp01(x); }
 void Synth::setVaSync(int osc, float x) noexcept { if(osc>=0&&osc<3&&std::isfinite(x)) vaSync_[osc]=clamp01(x); }
-void Synth::setOscWave(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) oscWave_[osc] = std::max(0, std::min(static_cast<int>(std::lround(x)), 6)); }
+bool Synth::loadUserWave(int osc,const char* path) noexcept { if(osc<0||osc>=3)return false; hasUserWave_[osc]=readWav(path,userWave_[osc]);return hasUserWave_[osc]; }
+bool Synth::loadUserGrain(int osc,const char* path) noexcept { if(osc<0||osc>=3)return false; hasUserGrain_[osc]=readWav(path,userGrain_[osc]);return hasUserGrain_[osc]; }
+void Synth::setGrainSourceMode(int osc,float x) noexcept { if(osc>=0&&osc<3&&std::isfinite(x)) grainSourceMode_[osc]=x>=0.5f?1:0; }
+void Synth::setOscWave(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) oscWave_[osc] = std::max(0, std::min(static_cast<int>(std::lround(x)), 7)); }
 void Synth::setLfoShape(int lfo, float x) noexcept { if (lfo>=0 && lfo<3 && std::isfinite(x)) lfoShape_[lfo] = std::max(0,std::min(9,static_cast<int>(std::lround(x)))); }
 float Synth::lfoValue(int lfo, double phase) const noexcept {
     const double p = phase - std::floor(phase);
@@ -153,7 +210,13 @@ float Synth::sampleOscWave(int osc, double phase, float position) const noexcept
       case 5: warped=p+amt*0.5; break; // phase shift
       default: break;
     }
-    return sampleWave(warped,position,oscWave_[osc]);
+    if(oscWave_[osc]==7 && hasUserWave_[osc]) {
+        const double idx=(warped-std::floor(warped))*kTableSize;
+        const int a=static_cast<int>(idx)%kTableSize,b=(a+1)%kTableSize;
+        const float t=static_cast<float>(idx-a);
+        return userWave_[osc][a]*(1-t)+userWave_[osc][b]*t;
+    }
+    return sampleWave(warped,position,oscWave_[osc]==7?0:oscWave_[osc]);
 }
 void Synth::render(float* left, float* right, std::size_t frames) noexcept {
     if (!left || !right) return;
@@ -272,7 +335,7 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
                         if(grainWindow_[osc]==1) window=1.0f-std::abs(2.0f*t-1.0f);
                         else if(grainWindow_[osc]==2) window=std::sin(static_cast<float>(pi*t));
                         else if(grainWindow_[osc]==3) window=(t<0.1f?t*10.0f:(t>0.9f?(1.0f-t)*10.0f:1.0f));
-                        grains += grainSource_[idx] * window;
+                        grains += ((grainSourceMode_[osc] && hasUserGrain_[osc]) ? userGrain_[osc][idx] : grainSource_[idx]) * window;
                         ++active; g.phase += g.step; if (++g.age >= g.length) g.active = false;
                     }
                     const float dry = sampleOscWave(osc,v.phase[osc],std::max(0.0f,std::min(2.0f,oscPosition_[osc]+matrixWt[osc]*2.0f)));
