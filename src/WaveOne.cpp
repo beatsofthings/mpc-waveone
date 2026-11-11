@@ -66,6 +66,22 @@ void Synth::setFilterResonance(float x) noexcept { if (std::isfinite(x)) resonan
 void Synth::setLfoRate(float x) noexcept { if (std::isfinite(x)) lfoRate_ = std::max(0.01f, std::min(x, 20.0f)); }
 void Synth::setLfoDepth(float x) noexcept { if (std::isfinite(x)) lfoDepth_ = std::max(0.0f, std::min(x, 12.0f)); }
 void Synth::setOscWave(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) oscWave_[osc] = std::max(0, std::min(static_cast<int>(std::lround(x)), 6)); }
+void Synth::setLfoShape(int lfo, float x) noexcept { if (lfo>=0 && lfo<3 && std::isfinite(x)) lfoShape_[lfo] = std::max(0,std::min(9,static_cast<int>(std::lround(x)))); }
+float Synth::lfoValue(int lfo, double phase) const noexcept {
+    const double p = phase - std::floor(phase);
+    switch (lfoShape_[lfo]) {
+      case 1: return static_cast<float>(4.0*std::abs(p-0.5)-1.0); // triangle
+      case 2: return static_cast<float>(2.0*p-1.0); // ramp up
+      case 3: return static_cast<float>(1.0-2.0*p); // ramp down
+      case 4: return p<0.5?1.0f:-1.0f; // square
+      case 5: return p<0.2?1.0f:-1.0f; // pulse
+      case 6: return static_cast<float>(std::sin(2*pi*p)*std::sin(4*pi*p)); // complex
+      case 7: return static_cast<float>(std::sin(2*pi*p)+0.3*std::sin(6*pi*p))/1.3f; // harmonic
+      case 8: return static_cast<float>(2.0*std::abs(std::sin(2*pi*p))-1.0); // rectified
+      case 9: return static_cast<float>(std::sin(2*pi*p)*std::sin(2*pi*p)*std::sin(2*pi*p)); // soft pulse
+      default: return static_cast<float>(std::sin(2*pi*p));
+    }
+}
 void Synth::setLfo3Rate(float x) noexcept { if (std::isfinite(x)) lfo3Rate_ = std::max(0.01f,std::min(x,20.0f)); }
 void Synth::setLfo3Depth(float x) noexcept { if (std::isfinite(x)) lfo3Depth_ = clamp01(x); }
 void Synth::setLfo4Rate(float x) noexcept { if (std::isfinite(x)) lfo4Rate_ = std::max(0.01f,std::min(x,20.0f)); }
@@ -111,11 +127,11 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
     if (!left || !right) return;
     for (std::size_t i = 0; i < frames; ++i) {
         float mixed = 0.0f;
-        const double vibrato = std::pow(2.0, std::sin(lfoPhase_ * 2.0 * pi) * lfoDepth_ / 12.0);
+        const double vibrato = std::pow(2.0, lfoValue(0,lfoPhase_) * lfoDepth_ / 12.0);
         lfoPhase_ += lfoRate_ / sampleRate_;
         if (lfoPhase_ >= 1.0) lfoPhase_ -= std::floor(lfoPhase_);
-        const float lfo2 = static_cast<float>(std::sin(lfo2Phase_ * 2.0 * pi)) * lfo2Depth_;
-        const float lfo3 = static_cast<float>(std::sin(lfo3Phase_ * 2.0 * pi)) * lfo3Depth_;
+        const float lfo2 = static_cast<float>(lfoValue(1,lfo2Phase_)) * lfo2Depth_;
+        const float lfo3 = static_cast<float>(lfoValue(2,lfo3Phase_)) * lfo3Depth_;
         lfo3Phase_ += lfo3Rate_ / sampleRate_;
         if (lfo3Phase_ >= 1.0) lfo3Phase_ -= std::floor(lfo3Phase_);
         const float curveIndex = static_cast<float>(lfo4Phase_ * 16.0);
@@ -130,7 +146,7 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
         for (auto& v : voices_) {
             if (v.stage == Voice::Off) continue;
             float matrixCutoff=0.0f, matrixPitch=0.0f, matrixLevel=0.0f;
-            const float sources[7] = {0.0f,static_cast<float>(std::sin(lfoPhase_*2.0*pi)),lfo2,lfo3,lfo4,v.velocity*2.0f-1.0f,(v.note-60.0f)/60.0f};
+            const float sources[7] = {0.0f,lfoValue(0,lfoPhase_),lfo2,lfo3,lfo4,v.velocity*2.0f-1.0f,(v.note-60.0f)/60.0f};
             for (int m=0;m<16;++m) {
                 const int src=matrixSource_[m],dst=matrixDestination_[m];
                 const float mod=sources[src]*matrixAmount_[m];
