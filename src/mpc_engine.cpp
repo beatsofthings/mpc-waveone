@@ -1,5 +1,9 @@
 #include "WaveOne.h"
+#include <cstdint>
+// Open-MPC engine.h declares mpc_engine with C++ linkage; include it inside a C linkage block.
+extern "C" {
 #include "engine.h"
+}
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
