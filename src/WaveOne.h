@@ -24,6 +24,11 @@ public:
     void setFilterResonance(float amount) noexcept;
     void setLfoRate(float hz) noexcept;
     void setLfoDepth(float semitones) noexcept;
+    void setLfo3Rate(float hz) noexcept;
+    void setLfo3Depth(float amount) noexcept;
+    void setLfo4Rate(float hz) noexcept;
+    void setLfo4Depth(float amount) noexcept;
+    void setLfo4Step(int index, float value) noexcept;
     void setLfo2Rate(float hz) noexcept;
     void setLfo2Depth(float amount) noexcept;
     void setLfo2Target(float target) noexcept;
@@ -63,7 +68,9 @@ private:
     float grainSpray_ = 0.0f, grainPitch_ = 0.0f, grainReverse_ = 0.0f, grainMix_ = 1.0f;
     float subLevel_ = 0.0f, cutoff_ = 18000.0f, resonance_ = 0.0f;
     float lfoRate_ = 2.0f, lfoDepth_ = 0.0f;
-    double lfoPhase_ = 0.0, lfo2Phase_ = 0.0;
+    double lfoPhase_ = 0.0, lfo2Phase_ = 0.0, lfo3Phase_ = 0.0, lfo4Phase_ = 0.0;
+    float lfo3Rate_ = 0.25f, lfo3Depth_ = 0.0f, lfo4Rate_ = 1.0f, lfo4Depth_ = 0.0f;
+    std::array<float,16> lfo4Steps_{{0,0.38f,0.7f,0.92f,1,0.92f,0.7f,0.38f,0,-0.38f,-0.7f,-0.92f,-1,-0.92f,-0.7f,-0.38f}};
     float lfo2Rate_ = 0.5f, lfo2Depth_ = 0.0f;
     int lfo2Target_ = 0;
     float filterEnvAmount_ = 0.0f, filterEnvAttack_ = 0.01f, filterEnvDecay_ = 0.2f;
