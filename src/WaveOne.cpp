@@ -66,6 +66,11 @@ void Synth::setFilterResonance(float x) noexcept { if (std::isfinite(x)) resonan
 void Synth::setLfoRate(float x) noexcept { if (std::isfinite(x)) lfoRate_ = std::max(0.01f, std::min(x, 20.0f)); }
 void Synth::setLfoDepth(float x) noexcept { if (std::isfinite(x)) lfoDepth_ = std::max(0.0f, std::min(x, 12.0f)); }
 void Synth::setOscWave(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) oscWave_[osc] = std::max(0, std::min(static_cast<int>(std::lround(x)), 6)); }
+void Synth::setLfo3Rate(float x) noexcept { if (std::isfinite(x)) lfo3Rate_ = std::max(0.01f,std::min(x,20.0f)); }
+void Synth::setLfo3Depth(float x) noexcept { if (std::isfinite(x)) lfo3Depth_ = clamp01(x); }
+void Synth::setLfo4Rate(float x) noexcept { if (std::isfinite(x)) lfo4Rate_ = std::max(0.01f,std::min(x,20.0f)); }
+void Synth::setLfo4Depth(float x) noexcept { if (std::isfinite(x)) lfo4Depth_ = clamp01(x); }
+void Synth::setLfo4Step(int i, float x) noexcept { if (i >= 0 && i < 16 && std::isfinite(x)) lfo4Steps_[i] = std::max(-1.0f,std::min(x,1.0f)); }
 void Synth::setLfo2Rate(float x) noexcept { if (std::isfinite(x)) lfo2Rate_ = std::max(0.01f, std::min(x, 20.0f)); }
 void Synth::setLfo2Depth(float x) noexcept { if (std::isfinite(x)) lfo2Depth_ = clamp01(x); }
 void Synth::setLfo2Target(float x) noexcept { if (std::isfinite(x)) lfo2Target_ = std::max(0, std::min(static_cast<int>(std::lround(x)), 2)); }
@@ -102,6 +107,16 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
         lfoPhase_ += lfoRate_ / sampleRate_;
         if (lfoPhase_ >= 1.0) lfoPhase_ -= std::floor(lfoPhase_);
         const float lfo2 = static_cast<float>(std::sin(lfo2Phase_ * 2.0 * pi)) * lfo2Depth_;
+        const float lfo3 = static_cast<float>(std::sin(lfo3Phase_ * 2.0 * pi)) * lfo3Depth_;
+        lfo3Phase_ += lfo3Rate_ / sampleRate_;
+        if (lfo3Phase_ >= 1.0) lfo3Phase_ -= std::floor(lfo3Phase_);
+        const float curveIndex = static_cast<float>(lfo4Phase_ * 16.0);
+        const int curveA = static_cast<int>(curveIndex) % 16;
+        const int curveB = (curveA+1)%16;
+        const float curveT = curveIndex - static_cast<float>(curveA);
+        const float lfo4 = (lfo4Steps_[curveA]*(1.0f-curveT)+lfo4Steps_[curveB]*curveT)*lfo4Depth_;
+        lfo4Phase_ += lfo4Rate_ / sampleRate_;
+        if (lfo4Phase_ >= 1.0) lfo4Phase_ -= std::floor(lfo4Phase_);
         lfo2Phase_ += lfo2Rate_ / sampleRate_;
         if (lfo2Phase_ >= 1.0) lfo2Phase_ -= std::floor(lfo2Phase_);
         for (auto& v : voices_) {
@@ -163,7 +178,7 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
             if (v.stage == Voice::Attack) v.filterEnv = std::min(1.0f, v.filterEnv + 1.0f / std::max(1.0f, filterEnvAttack_ * static_cast<float>(sampleRate_)));
             else if (v.stage == Voice::Decay || v.stage == Voice::Sustain) v.filterEnv += (filterEnvSustain_ - v.filterEnv) / std::max(1.0f, filterEnvDecay_ * static_cast<float>(sampleRate_));
             else if (v.stage == Voice::Release) v.filterEnv = std::max(0.0f, v.filterEnv - v.filterReleaseStep);
-            const float mod = filterEnvAmount_ * v.filterEnv + (lfo2Target_ == 1 ? lfo2 : 0.0f);
+            const float mod = filterEnvAmount_ * v.filterEnv + (lfo2Target_ == 1 ? lfo2 : 0.0f) + lfo3 + lfo4;
             const float effectiveCutoff = std::max(30.0f, std::min(18000.0f, cutoff_ * std::pow(2.0f, 5.0f * mod)));
             const float alpha = static_cast<float>(1.0 - std::exp(-2.0 * pi * effectiveCutoff / sampleRate_));
             v.filterState += alpha * (input - v.filterState);
