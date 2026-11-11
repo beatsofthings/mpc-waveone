@@ -14,7 +14,11 @@ jobs:
           path: open-mpc
       - name: Enable ARM64 container execution
         run: docker run --rm --privileged tonistiigi/binfmt --install arm64
-      - name: Generate 3D wavetable filmstrip\n        run: |\n          python3 -m pip install pillow\n          python3 tools/generate_wavetable_3d.py\n      - name: Build Gen2 plugin
+      - name: Generate 3D wavetable filmstrip
+        run: |
+          python3 -m pip install pillow
+          python3 tools/generate_wavetable_3d.py
+      - name: Build Gen2 plugin
         run: bash open-mpc/tools/build_port.sh vst.json aarch64
       - name: Verify ARM64 plugin binary
         run: |
@@ -28,7 +32,7 @@ jobs:
             --so build/aarch64/waveone.so \
             --skin 'build/skin/Beats of Things - VST - WaveOne' \
             --entry build/pluginlist-entry.xml \
-            --version 0.1.0 \
+            --version 0.2.0 \
             --about 'Experimental eight-voice wavetable synthesizer for MPC Live III.' \
             --repo beatsofthings/mpc-waveone \
             --license MIT \
