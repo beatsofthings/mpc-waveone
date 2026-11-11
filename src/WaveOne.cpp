@@ -44,21 +44,24 @@ void Synth::noteOff(int midiNote) noexcept {
     }
 }
 void Synth::allNotesOff() noexcept { for (auto& v : voices_) v = {}; }
-void Synth::setPosition(float x) noexcept { if (std::isfinite(x)) position_ = std::max(0.0f, std::min(x, 2.0f)); }
+void Synth::setPosition(float x) noexcept { if (std::isfinite(x)) oscPosition_[0] = std::max(0.0f, std::min(x, 2.0f)); }
 void Synth::setAttack(float x) noexcept { if (std::isfinite(x)) attack_ = std::max(0.001f, std::min(x, 10.0f)); }
 void Synth::setDecay(float x) noexcept { if (std::isfinite(x)) decay_ = std::max(0.001f, std::min(x, 10.0f)); }
 void Synth::setSustain(float x) noexcept { if (std::isfinite(x)) sustain_ = clamp01(x); }
 void Synth::setRelease(float x) noexcept { if (std::isfinite(x)) release_ = std::max(0.001f, std::min(x, 10.0f)); }
 void Synth::setGain(float x) noexcept { if (std::isfinite(x)) gain_ = clamp01(x); }
-float Synth::sampleWave(double phase) const noexcept {
+void Synth::setOscPosition(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) oscPosition_[osc] = std::max(0.0f, std::min(x, 2.0f)); }
+void Synth::setOscLevel(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) oscLevel_[osc] = clamp01(x); }
+void Synth::setOscTune(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) oscTune_[osc] = std::max(-24.0f, std::min(x, 24.0f)); }
+float Synth::sampleWave(double phase, float position) const noexcept {
     const double wrapped = phase - std::floor(phase);
     const double idx = wrapped * kTableSize;
     const int a = static_cast<int>(idx) % kTableSize;
     const int b = (a + 1) % kTableSize;
     const float frac = static_cast<float>(idx - std::floor(idx));
-    const int first = std::min(1, static_cast<int>(position_));
+    const int first = std::min(1, static_cast<int>(position));
     const int second = std::min(2, first + 1);
-    const float blend = position_ - first;
+    const float blend = position - first;
     auto read = [&](int table) { return tables_[table][a] + frac * (tables_[table][b] - tables_[table][a]); };
     return (1.0f - blend) * read(first) + blend * read(second);
 }
@@ -84,9 +87,14 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
                     break;
                 case Voice::Off: break;
             }
-            mixed += sampleWave(v.phase) * v.env * v.velocity;
-            v.phase += v.phaseStep;
-            if (v.phase >= 1.0) v.phase -= std::floor(v.phase);
+            float voiceSample = 0.0f;
+            for (int osc = 0; osc < 3; ++osc) {
+                if (oscLevel_[osc] <= 0.0f) continue;
+                voiceSample += sampleWave(v.phase[osc], oscPosition_[osc]) * oscLevel_[osc];
+                v.phase[osc] += v.phaseStep * std::pow(2.0, oscTune_[osc] / 12.0);
+                if (v.phase[osc] >= 1.0) v.phase[osc] -= std::floor(v.phase[osc]);
+            }
+            mixed += voiceSample * v.env * v.velocity;
         }
         const float output = std::max(-1.0f, std::min(mixed * gain_, 1.0f));
         left[i] = output;
