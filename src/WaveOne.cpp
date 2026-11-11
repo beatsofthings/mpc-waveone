@@ -79,6 +79,9 @@ void Synth::setFilterEnvAttack(float x) noexcept { if (std::isfinite(x)) filterE
 void Synth::setFilterEnvDecay(float x) noexcept { if (std::isfinite(x)) filterEnvDecay_ = std::max(0.001f, std::min(x, 10.0f)); }
 void Synth::setFilterEnvSustain(float x) noexcept { if (std::isfinite(x)) filterEnvSustain_ = clamp01(x); }
 void Synth::setFilterEnvRelease(float x) noexcept { if (std::isfinite(x)) filterEnvRelease_ = std::max(0.001f, std::min(x, 10.0f)); }
+void Synth::setMatrixSource(int slot, float x) noexcept { if(slot>=0 && slot<16 && std::isfinite(x)) matrixSource_[slot]=std::max(0,std::min(6,static_cast<int>(std::lround(x)))); }
+void Synth::setMatrixDestination(int slot, float x) noexcept { if(slot>=0 && slot<16 && std::isfinite(x)) matrixDestination_[slot]=std::max(0,std::min(3,static_cast<int>(std::lround(x)))); }
+void Synth::setMatrixAmount(int slot, float x) noexcept { if(slot>=0 && slot<16 && std::isfinite(x)) matrixAmount_[slot]=std::max(-1.0f,std::min(x,1.0f)); }
 void Synth::setEngineType(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) engineType_[osc] = std::max(0,std::min(3,static_cast<int>(std::lround(x)))); }
 void Synth::setVaPulseWidth(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) vaPulseWidth_[osc] = std::max(0.05f,std::min(x,0.95f)); }
 void Synth::setVaDetune(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) vaDetune_[osc] = std::max(0.0f,std::min(x,1.0f)); }
@@ -126,6 +129,18 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
         if (lfo2Phase_ >= 1.0) lfo2Phase_ -= std::floor(lfo2Phase_);
         for (auto& v : voices_) {
             if (v.stage == Voice::Off) continue;
+            float matrixCutoff=0.0f, matrixPitch=0.0f, matrixLevel=0.0f;
+            const float sources[7] = {0.0f,static_cast<float>(std::sin(lfoPhase_*2.0*pi)),lfo2,lfo3,lfo4,v.velocity*2.0f-1.0f,(v.note-60.0f)/60.0f};
+            for (int m=0;m<16;++m) {
+                const int src=matrixSource_[m],dst=matrixDestination_[m];
+                const float mod=sources[src]*matrixAmount_[m];
+                if(dst==1) matrixCutoff+=mod;
+                else if(dst==2) matrixPitch+=mod;
+                else if(dst==3) matrixLevel+=mod;
+            }
+            matrixCutoff=std::max(-2.0f,std::min(matrixCutoff,2.0f));
+            matrixPitch=std::max(-2.0f,std::min(matrixPitch,2.0f));
+            matrixLevel=std::max(-1.0f,std::min(matrixLevel,1.0f));
             switch (v.stage) {
                 case Voice::Attack:
                     v.env += 1.0f / std::max(1.0f, attack_ * static_cast<float>(sampleRate_));
@@ -184,7 +199,7 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
                     const float dry = sampleWave(v.phase[osc], oscPosition_[osc], oscWave_[osc]);
                     voiceSample += (dry*(1.0f-grainMix_) + (active ? grains / std::sqrt(static_cast<float>(active)) : 0.0f)*grainMix_) * oscLevel_[osc];
                 } else voiceSample += sampleWave(v.phase[osc], oscPosition_[osc], oscWave_[osc]) * oscLevel_[osc];
-                v.phase[osc] += v.phaseStep * vibrato * std::pow(2.0, oscTune_[osc] / 12.0);
+                v.phase[osc] += v.phaseStep * vibrato * std::pow(2.0, (oscTune_[osc]+matrixPitch*12.0f) / 12.0);
                 if (v.phase[osc] >= 1.0) v.phase[osc] -= std::floor(v.phase[osc]);
             }
             v.subPhase += v.phaseStep * 0.5 * vibrato;
@@ -198,11 +213,11 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
             if (v.stage == Voice::Attack) v.filterEnv = std::min(1.0f, v.filterEnv + 1.0f / std::max(1.0f, filterEnvAttack_ * static_cast<float>(sampleRate_)));
             else if (v.stage == Voice::Decay || v.stage == Voice::Sustain) v.filterEnv += (filterEnvSustain_ - v.filterEnv) / std::max(1.0f, filterEnvDecay_ * static_cast<float>(sampleRate_));
             else if (v.stage == Voice::Release) v.filterEnv = std::max(0.0f, v.filterEnv - v.filterReleaseStep);
-            const float mod = filterEnvAmount_ * v.filterEnv + (lfo2Target_ == 1 ? lfo2 : 0.0f) + lfo3 + lfo4;
+            const float mod = filterEnvAmount_ * v.filterEnv + (lfo2Target_ == 1 ? lfo2 : 0.0f) + lfo3 + lfo4 + matrixCutoff;
             const float effectiveCutoff = std::max(30.0f, std::min(18000.0f, cutoff_ * std::pow(2.0f, 5.0f * mod)));
             const float alpha = static_cast<float>(1.0 - std::exp(-2.0 * pi * effectiveCutoff / sampleRate_));
             v.filterState += alpha * (input - v.filterState);
-            mixed += v.filterState * v.env * v.velocity;
+            mixed += v.filterState * v.env * v.velocity * std::max(0.0f,1.0f+matrixLevel);
         }
         const float output = std::max(-1.0f, std::min(mixed * gain_, 1.0f));
         left[i] = output;
