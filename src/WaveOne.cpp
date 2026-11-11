@@ -67,6 +67,9 @@ void Synth::setFilterCutoff(float x) noexcept { if (std::isfinite(x)) cutoff_ = 
 void Synth::setFilterResonance(float x) noexcept { if (std::isfinite(x)) resonance_ = clamp01(x); }
 void Synth::setLfoRate(float x) noexcept { if (std::isfinite(x)) lfoRate_ = std::max(0.01f, std::min(x, 20.0f)); }
 void Synth::setLfoDepth(float x) noexcept { if (std::isfinite(x)) lfoDepth_ = std::max(0.0f, std::min(x, 12.0f)); }
+void Synth::setWtWarpMode(int osc, float x) noexcept { if(osc>=0&&osc<3&&std::isfinite(x)) wtWarpMode_[osc]=std::max(0,std::min(5,static_cast<int>(std::lround(x)))); }
+void Synth::setWtWarpAmount(int osc, float x) noexcept { if(osc>=0&&osc<3&&std::isfinite(x)) wtWarpAmount_[osc]=clamp01(x); }
+void Synth::setVaSync(int osc, float x) noexcept { if(osc>=0&&osc<3&&std::isfinite(x)) vaSync_[osc]=clamp01(x); }
 void Synth::setOscWave(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) oscWave_[osc] = std::max(0, std::min(static_cast<int>(std::lround(x)), 6)); }
 void Synth::setLfoShape(int lfo, float x) noexcept { if (lfo>=0 && lfo<3 && std::isfinite(x)) lfoShape_[lfo] = std::max(0,std::min(9,static_cast<int>(std::lround(x)))); }
 float Synth::lfoValue(int lfo, double phase) const noexcept {
@@ -135,6 +138,20 @@ float Synth::sampleWave(double phase, float position, int wave) const noexcept {
     auto read = [&](int table) { return tables_[table][a] + frac * (tables_[table][b] - tables_[table][a]); };
     return (1.0f - blend) * read(first) + blend * read(second);
 }
+float Synth::sampleOscWave(int osc, double phase, float position) const noexcept {
+    const double p=phase-std::floor(phase);
+    const double amt=wtWarpAmount_[osc];
+    double warped=p;
+    switch(wtWarpMode_[osc]) {
+      case 1: warped=std::pow(p,1.0+amt*7.0); break; // bend+
+      case 2: warped=1.0-std::pow(1.0-p,1.0+amt*7.0); break; // bend-
+      case 3: warped=p+amt*std::sin(2.0*pi*p)/(2.0*pi); break; // phase bend
+      case 4: warped=p*(1.0+amt*3.0); break; // sync warp
+      case 5: warped=p+amt*0.5; break; // phase shift
+      default: break;
+    }
+    return sampleWave(warped,position,oscWave_[osc]);
+}
 void Synth::render(float* left, float* right, std::size_t frames) noexcept {
     if (!left || !right) return;
     for (std::size_t i = 0; i < frames; ++i) {
@@ -195,7 +212,7 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
                 if (oscLevel_[osc] <= 0.0f || oscEnabled_[osc] < 0.5f) continue;
                 if (engineType_[osc] == 2) {
                     // Two detuned virtual-analog oscillators: saw + variable pulse.
-                    const double a = v.vaPhase[osc];
+                    const double a = vaSync_[osc]>=0.5f ? std::fmod(v.vaPhase[osc],1.0) : v.vaPhase[osc];
                     const double b = v.phase[osc];
                     const float saw = static_cast<float>(2.0*a-1.0);
                     const float pulse = b < std::max(0.05f,std::min(0.95f,vaPulseWidth_[osc]+matrixVa[osc]*0.45f)) ? 1.0f : -1.0f;
@@ -208,6 +225,7 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
                     const float noise=static_cast<float>((v.rng>>8)&0xffffffu)/8388608.0f-1.0f;
                     voiceSample += (va*(1.0f-vaNoise_[osc])+noise*vaNoise_[osc])*oscLevel_[osc];
                     v.vaPhase[osc] += v.phaseStep*vibrato*std::pow(2.0,vaDetune_[osc]/12.0);
+                    if(vaSync_[osc]>=0.5f && v.phase[osc]+v.phaseStep*vibrato>=1.0) v.vaPhase[osc]=0.0;
                     if (v.vaPhase[osc] >= 1.0) v.vaPhase[osc] -= std::floor(v.vaPhase[osc]);
                 } else if (engineType_[osc] == 3) {
                     // Two-operator FM prototype; full DX7 six-operator engine is pending.
@@ -241,7 +259,7 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
                         grains += grainSource_[idx] * window;
                         ++active; g.phase += g.step; if (++g.age >= g.length) g.active = false;
                     }
-                    const float dry = sampleWave(v.phase[osc], std::max(0.0f,std::min(2.0f,oscPosition_[osc]+matrixWt[osc]*2.0f)), oscWave_[osc]);
+                    const float dry = sampleOscWave(osc,v.phase[osc],std::max(0.0f,std::min(2.0f,oscPosition_[osc]+matrixWt[osc]*2.0f)));
                     voiceSample += (dry*(1.0f-grainParams_[osc][6]) + (active ? grains / std::sqrt(static_cast<float>(active)) : 0.0f)*grainParams_[osc][6]) * oscLevel_[osc];
                 } else voiceSample += sampleWave(v.phase[osc], std::max(0.0f,std::min(2.0f,oscPosition_[osc]+matrixWt[osc]*2.0f)), oscWave_[osc]) * oscLevel_[osc];
                 v.phase[osc] += v.phaseStep * vibrato * std::pow(2.0, (oscTune_[osc]+matrixPitch*12.0f) / 12.0);
