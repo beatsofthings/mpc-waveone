@@ -4,7 +4,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - name: Checkout Open MPC toolchain
@@ -12,17 +12,49 @@ jobs:
         with:
           repository: open-mpc/mpc-vst-plugins
           path: open-mpc
+      - name: Enable ARM64 container execution
+        run: docker run --rm --privileged tonistiigi/binfmt --install arm64
       - name: Build Gen2 plugin
+        run: bash open-mpc/tools/build_port.sh vst.json aarch64
+      - name: Verify ARM64 plugin binary
         run: |
-          docker run --rm --privileged tonistiigi/binfmt --install arm64
-          bash open-mpc/tools/build_port.sh vst.json aarch64
-      - name: Upload experimental build outputs
-        if: always()
+          file build/aarch64/waveone.so
+          readelf -h build/aarch64/waveone.so | grep -E 'Class:|Machine:'
+          readelf -h build/aarch64/waveone.so | grep -q 'AArch64'
+          test -s build/skin/'Beats of Things - VST - WaveOne'/'Plugin Skins'/TUI.json
+      - name: Package experimental MPC install ZIP
+        run: |
+          python3 open-mpc/tools/release.py \
+            --so build/aarch64/waveone.so \
+            --skin 'build/skin/Beats of Things - VST - WaveOne' \
+            --entry build/pluginlist-entry.xml \
+            --version 0.1.0 \
+            --about 'Experimental eight-voice wavetable synthesizer for MPC Live III.' \
+            --repo beatsofthings/mpc-waveone \
+            --license MIT \
+            -o dist
+      - name: Verify release package
+        run: |
+          ls -lah dist
+          python3 - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+          packages = list(Path('dist').glob('*-mpc-aarch64.zip'))
+          assert len(packages) == 1, packages
+          with ZipFile(packages[0]) as z:
+              names = z.namelist()
+              assert any(n.endswith('/waveone.so') for n in names)
+              assert any(n.endswith('/install.sh') for n in names)
+              assert any(n.endswith('/uninstall.sh') for n in names)
+              assert any(n.endswith('/INSTALL.md') for n in names)
+          print('Experimental MPC install package structure: PASS')
+          PY
+      - name: Upload install ZIP and skin
+        if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: waveone-arm64-build
+          name: waveone-live3-experimental-install
           path: |
-            build/aarch64/
+            dist/*-mpc-aarch64.zip
             build/skin/
-            build/pluginlist-entry.xml
-          if-no-files-found: warn
+          if-no-files-found: error
