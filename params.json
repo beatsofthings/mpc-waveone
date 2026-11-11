@@ -335,6 +335,146 @@
       "min": 0,
       "max": 1,
       "default": 1
+    },
+    {
+      "key": "lfo3_rate",
+      "name": "LFO 3 Rate",
+      "min": 0.01,
+      "max": 20,
+      "default": 0.25
+    },
+    {
+      "key": "lfo3_depth",
+      "name": "LFO 3 Filter",
+      "min": 0,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "lfo4_rate",
+      "name": "LFO 4 Rate",
+      "min": 0.01,
+      "max": 20,
+      "default": 1
+    },
+    {
+      "key": "lfo4_depth",
+      "name": "LFO 4 Filter",
+      "min": 0,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "lfo4_step_01",
+      "name": "Curve 1",
+      "min": -1,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "lfo4_step_02",
+      "name": "Curve 2",
+      "min": -1,
+      "max": 1,
+      "default": 0.3826834323650898
+    },
+    {
+      "key": "lfo4_step_03",
+      "name": "Curve 3",
+      "min": -1,
+      "max": 1,
+      "default": 0.7071067811865475
+    },
+    {
+      "key": "lfo4_step_04",
+      "name": "Curve 4",
+      "min": -1,
+      "max": 1,
+      "default": 0.9238795325112867
+    },
+    {
+      "key": "lfo4_step_05",
+      "name": "Curve 5",
+      "min": -1,
+      "max": 1,
+      "default": 1
+    },
+    {
+      "key": "lfo4_step_06",
+      "name": "Curve 6",
+      "min": -1,
+      "max": 1,
+      "default": 0.9238795325112867
+    },
+    {
+      "key": "lfo4_step_07",
+      "name": "Curve 7",
+      "min": -1,
+      "max": 1,
+      "default": 0.7071067811865476
+    },
+    {
+      "key": "lfo4_step_08",
+      "name": "Curve 8",
+      "min": -1,
+      "max": 1,
+      "default": 0.3826834323650899
+    },
+    {
+      "key": "lfo4_step_09",
+      "name": "Curve 9",
+      "min": -1,
+      "max": 1,
+      "default": 1.2246467991473532e-16
+    },
+    {
+      "key": "lfo4_step_10",
+      "name": "Curve 10",
+      "min": -1,
+      "max": 1,
+      "default": -0.38268343236508967
+    },
+    {
+      "key": "lfo4_step_11",
+      "name": "Curve 11",
+      "min": -1,
+      "max": 1,
+      "default": -0.7071067811865475
+    },
+    {
+      "key": "lfo4_step_12",
+      "name": "Curve 12",
+      "min": -1,
+      "max": 1,
+      "default": -0.9238795325112865
+    },
+    {
+      "key": "lfo4_step_13",
+      "name": "Curve 13",
+      "min": -1,
+      "max": 1,
+      "default": -1
+    },
+    {
+      "key": "lfo4_step_14",
+      "name": "Curve 14",
+      "min": -1,
+      "max": 1,
+      "default": -0.9238795325112866
+    },
+    {
+      "key": "lfo4_step_15",
+      "name": "Curve 15",
+      "min": -1,
+      "max": 1,
+      "default": -0.7071067811865477
+    },
+    {
+      "key": "lfo4_step_16",
+      "name": "Curve 16",
+      "min": -1,
+      "max": 1,
+      "default": -0.3826834323650904
     }
   ]
 }
