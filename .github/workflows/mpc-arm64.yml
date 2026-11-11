@@ -14,7 +14,7 @@ jobs:
           path: open-mpc
       - name: Enable ARM64 container execution
         run: docker run --rm --privileged tonistiigi/binfmt --install arm64
-      - name: Build Gen2 plugin
+      - name: Generate 3D wavetable filmstrip\n        run: |\n          python3 -m pip install pillow\n          python3 tools/generate_wavetable_3d.py\n      - name: Build Gen2 plugin
         run: bash open-mpc/tools/build_port.sh vst.json aarch64
       - name: Verify ARM64 plugin binary
         run: |
