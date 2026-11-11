@@ -24,6 +24,8 @@ struct Instance {
     float sub_level = 0.0f, cutoff = 18000.0f, resonance = 0.0f;
     float lfo1_rate = 2.0f, lfo1_depth = 0.0f;
     float lfo2_rate = 0.5f, lfo2_depth = 0.0f, lfo2_target = 0.0f;
+    float lfo3_rate = 0.25f, lfo3_depth = 0.0f, lfo4_rate = 1.0f, lfo4_depth = 0.0f;
+    float lfo4_steps[16] = {0,.38f,.7f,.92f,1,.92f,.7f,.38f,0,-.38f,-.7f,-.92f,-1,-.92f,-.7f,-.38f};
     float filter_env_amount = 0.0f, filter_env_attack = 0.01f, filter_env_decay = 0.2f;
     float filter_env_sustain = 0.0f, filter_env_release = 0.2f;
     float osc1_mode = 0.0f, osc2_mode = 0.0f, osc3_mode = 0.0f;
@@ -70,6 +72,11 @@ float* param(Instance& i, const char* key) {
     if (!std::strcmp(key,"resonance")) return &i.resonance;
     if (!std::strcmp(key,"lfo1_rate")) return &i.lfo1_rate;
     if (!std::strcmp(key,"lfo1_depth")) return &i.lfo1_depth;
+    for (int n=0;n<16;++n) { char name[24]; std::snprintf(name,sizeof(name),"lfo4_step_%02d",n+1); if (!std::strcmp(key,name)) return &i.lfo4_steps[n]; }
+    if (!std::strcmp(key,"lfo3_rate")) return &i.lfo3_rate;
+    if (!std::strcmp(key,"lfo3_depth")) return &i.lfo3_depth;
+    if (!std::strcmp(key,"lfo4_rate")) return &i.lfo4_rate;
+    if (!std::strcmp(key,"lfo4_depth")) return &i.lfo4_depth;
     if (!std::strcmp(key,"lfo2_rate")) return &i.lfo2_rate;
     if (!std::strcmp(key,"lfo2_depth")) return &i.lfo2_depth;
     if (!std::strcmp(key,"lfo2_target")) return &i.lfo2_target;
@@ -122,6 +129,11 @@ void set_param(void* p, const char* key, const char* val) {
     i.synth.setFilterResonance(i.resonance);
     i.synth.setLfoRate(i.lfo1_rate);
     i.synth.setLfoDepth(i.lfo1_depth);
+    i.synth.setLfo3Rate(i.lfo3_rate);
+    i.synth.setLfo3Depth(i.lfo3_depth);
+    i.synth.setLfo4Rate(i.lfo4_rate);
+    i.synth.setLfo4Depth(i.lfo4_depth);
+    for (int n=0;n<16;++n) i.synth.setLfo4Step(n,i.lfo4_steps[n]);
     i.synth.setLfo2Rate(i.lfo2_rate);
     i.synth.setLfo2Depth(i.lfo2_depth);
     i.synth.setLfo2Target(i.lfo2_target);
