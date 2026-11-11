@@ -123,6 +123,10 @@ void Synth::setLfoRate(float x) noexcept { if (std::isfinite(x)) lfoRate_ = std:
 void Synth::setLfoDepth(float x) noexcept { if (std::isfinite(x)) lfoDepth_ = std::max(0.0f, std::min(x, 12.0f)); }
 void Synth::setWtWarpMode(int osc, float x) noexcept { if(osc>=0&&osc<3&&std::isfinite(x)) wtWarpMode_[osc]=std::max(0,std::min(5,static_cast<int>(std::lround(x)))); }
 void Synth::setWtWarpAmount(int osc, float x) noexcept { if(osc>=0&&osc<3&&std::isfinite(x)) wtWarpAmount_[osc]=clamp01(x); }
+void Synth::setVaMix(int osc,float x) noexcept { if(osc>=0&&osc<3&&std::isfinite(x))vaMix_[osc]=clamp01(x); }
+void Synth::setVaSub(int osc,float x) noexcept { if(osc>=0&&osc<3&&std::isfinite(x))vaSub_[osc]=clamp01(x); }
+void Synth::setVaPwmRate(int osc,float x) noexcept { if(osc>=0&&osc<3&&std::isfinite(x))vaPwmRate_[osc]=std::max(.01f,std::min(20.0f,x)); }
+void Synth::setVaPwmDepth(int osc,float x) noexcept { if(osc>=0&&osc<3&&std::isfinite(x))vaPwmDepth_[osc]=clamp01(x); }
 void Synth::setVaSync(int osc, float x) noexcept { if(osc>=0&&osc<3&&std::isfinite(x)) vaSync_[osc]=clamp01(x); }
 bool Synth::loadUserWave(int osc,const char* path) noexcept { if(osc<0||osc>=3)return false; hasUserWave_[osc]=readWav(path,userWave_[osc]);return hasUserWave_[osc]; }
 bool Synth::loadUserGrain(int osc,const char* path) noexcept { if(osc<0||osc>=3)return false; hasUserGrain_[osc]=readWav(path,userGrain_[osc]);return hasUserGrain_[osc]; }
@@ -281,15 +285,19 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
                     const double a = vaSync_[osc]>=0.5f ? std::fmod(v.vaPhase[osc],1.0) : v.vaPhase[osc];
                     const double b = v.phase[osc];
                     const float saw = static_cast<float>(2.0*a-1.0);
-                    const float pulse = b < std::max(0.05f,std::min(0.95f,vaPulseWidth_[osc]+matrixVa[osc]*0.45f)) ? 1.0f : -1.0f;
-                    float va = 0.55f*saw+0.45f*pulse;
+                    const float pwm=static_cast<float>(std::sin(2*pi*v.vaPwmPhase[osc]))*vaPwmDepth_[osc]*.45f;
+                    const float pulse = b < std::max(0.05f,std::min(0.95f,vaPulseWidth_[osc]+matrixVa[osc]*0.45f+pwm)) ? 1.0f : -1.0f;
+                    v.vaPwmPhase[osc]+=vaPwmRate_[osc]/sampleRate_;
+                    if(v.vaPwmPhase[osc]>=1.0)v.vaPwmPhase[osc]-=std::floor(v.vaPwmPhase[osc]);
+                    float va = (1.0f-vaMix_[osc])*saw+vaMix_[osc]*pulse;
                     if(vaWaveform_[osc]==1) va=saw;
                     else if(vaWaveform_[osc]==2) va=pulse;
                     else if(vaWaveform_[osc]==3) va=static_cast<float>(1.0-4.0*std::abs(a-0.5));
                     else if(vaWaveform_[osc]==4) va=static_cast<float>(std::sin(2*pi*a));
                     v.rng=v.rng*1664525u+1013904223u;
                     const float noise=static_cast<float>((v.rng>>8)&0xffffffu)/8388608.0f-1.0f;
-                    voiceSample += (va*(1.0f-vaNoise_[osc])+noise*vaNoise_[osc])*oscLevel_[osc];
+                    const float sub=static_cast<float>(std::sin(pi*v.phase[osc]));
+                    voiceSample += (va*(1.0f-vaNoise_[osc])+noise*vaNoise_[osc]+sub*vaSub_[osc]) * oscLevel_[osc] / (1.0f+vaSub_[osc]);
                     v.vaPhase[osc] += v.phaseStep*vibrato*std::pow(2.0,vaDetune_[osc]/12.0);
                     if(vaSync_[osc]>=0.5f && v.phase[osc]+v.phaseStep*vibrato>=1.0) v.vaPhase[osc]=0.0;
                     if (v.vaPhase[osc] >= 1.0) v.vaPhase[osc] -= std::floor(v.vaPhase[osc]);
