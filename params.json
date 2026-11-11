@@ -1720,6 +1720,291 @@
         "ON"
       ],
       "default": 0
+    },
+    {
+      "key": "osc1_fm_algorithm",
+      "name": "OSC 1 FM Routing",
+      "options": [
+        "SERIAL",
+        "PARALLEL MOD",
+        "TWO STACKS",
+        "ADDITIVE"
+      ],
+      "default": 0
+    },
+    {
+      "key": "osc1_fm_op1_ratio",
+      "name": "OSC 1 OP1 Ratio",
+      "min": 0.25,
+      "max": 32,
+      "default": 1
+    },
+    {
+      "key": "osc1_fm_op1_level",
+      "name": "OSC 1 OP1 Level",
+      "min": 0,
+      "max": 1,
+      "default": 1
+    },
+    {
+      "key": "osc1_fm_op2_ratio",
+      "name": "OSC 1 OP2 Ratio",
+      "min": 0.25,
+      "max": 32,
+      "default": 2
+    },
+    {
+      "key": "osc1_fm_op2_level",
+      "name": "OSC 1 OP2 Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.7
+    },
+    {
+      "key": "osc1_fm_op3_ratio",
+      "name": "OSC 1 OP3 Ratio",
+      "min": 0.25,
+      "max": 32,
+      "default": 3
+    },
+    {
+      "key": "osc1_fm_op3_level",
+      "name": "OSC 1 OP3 Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.4
+    },
+    {
+      "key": "osc1_fm_op4_ratio",
+      "name": "OSC 1 OP4 Ratio",
+      "min": 0.25,
+      "max": 32,
+      "default": 4
+    },
+    {
+      "key": "osc1_fm_op4_level",
+      "name": "OSC 1 OP4 Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.2
+    },
+    {
+      "key": "osc1_fm_op5_ratio",
+      "name": "OSC 1 OP5 Ratio",
+      "min": 0.25,
+      "max": 32,
+      "default": 5
+    },
+    {
+      "key": "osc1_fm_op5_level",
+      "name": "OSC 1 OP5 Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.1
+    },
+    {
+      "key": "osc1_fm_op6_ratio",
+      "name": "OSC 1 OP6 Ratio",
+      "min": 0.25,
+      "max": 32,
+      "default": 6
+    },
+    {
+      "key": "osc1_fm_op6_level",
+      "name": "OSC 1 OP6 Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.1
+    },
+    {
+      "key": "osc2_fm_algorithm",
+      "name": "OSC 2 FM Routing",
+      "options": [
+        "SERIAL",
+        "PARALLEL MOD",
+        "TWO STACKS",
+        "ADDITIVE"
+      ],
+      "default": 0
+    },
+    {
+      "key": "osc2_fm_op1_ratio",
+      "name": "OSC 2 OP1 Ratio",
+      "min": 0.25,
+      "max": 32,
+      "default": 1
+    },
+    {
+      "key": "osc2_fm_op1_level",
+      "name": "OSC 2 OP1 Level",
+      "min": 0,
+      "max": 1,
+      "default": 1
+    },
+    {
+      "key": "osc2_fm_op2_ratio",
+      "name": "OSC 2 OP2 Ratio",
+      "min": 0.25,
+      "max": 32,
+      "default": 2
+    },
+    {
+      "key": "osc2_fm_op2_level",
+      "name": "OSC 2 OP2 Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.7
+    },
+    {
+      "key": "osc2_fm_op3_ratio",
+      "name": "OSC 2 OP3 Ratio",
+      "min": 0.25,
+      "max": 32,
+      "default": 3
+    },
+    {
+      "key": "osc2_fm_op3_level",
+      "name": "OSC 2 OP3 Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.4
+    },
+    {
+      "key": "osc2_fm_op4_ratio",
+      "name": "OSC 2 OP4 Ratio",
+      "min": 0.25,
+      "max": 32,
+      "default": 4
+    },
+    {
+      "key": "osc2_fm_op4_level",
+      "name": "OSC 2 OP4 Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.2
+    },
+    {
+      "key": "osc2_fm_op5_ratio",
+      "name": "OSC 2 OP5 Ratio",
+      "min": 0.25,
+      "max": 32,
+      "default": 5
+    },
+    {
+      "key": "osc2_fm_op5_level",
+      "name": "OSC 2 OP5 Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.1
+    },
+    {
+      "key": "osc2_fm_op6_ratio",
+      "name": "OSC 2 OP6 Ratio",
+      "min": 0.25,
+      "max": 32,
+      "default": 6
+    },
+    {
+      "key": "osc2_fm_op6_level",
+      "name": "OSC 2 OP6 Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.1
+    },
+    {
+      "key": "osc3_fm_algorithm",
+      "name": "OSC 3 FM Routing",
+      "options": [
+        "SERIAL",
+        "PARALLEL MOD",
+        "TWO STACKS",
+        "ADDITIVE"
+      ],
+      "default": 0
+    },
+    {
+      "key": "osc3_fm_op1_ratio",
+      "name": "OSC 3 OP1 Ratio",
+      "min": 0.25,
+      "max": 32,
+      "default": 1
+    },
+    {
+      "key": "osc3_fm_op1_level",
+      "name": "OSC 3 OP1 Level",
+      "min": 0,
+      "max": 1,
+      "default": 1
+    },
+    {
+      "key": "osc3_fm_op2_ratio",
+      "name": "OSC 3 OP2 Ratio",
+      "min": 0.25,
+      "max": 32,
+      "default": 2
+    },
+    {
+      "key": "osc3_fm_op2_level",
+      "name": "OSC 3 OP2 Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.7
+    },
+    {
+      "key": "osc3_fm_op3_ratio",
+      "name": "OSC 3 OP3 Ratio",
+      "min": 0.25,
+      "max": 32,
+      "default": 3
+    },
+    {
+      "key": "osc3_fm_op3_level",
+      "name": "OSC 3 OP3 Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.4
+    },
+    {
+      "key": "osc3_fm_op4_ratio",
+      "name": "OSC 3 OP4 Ratio",
+      "min": 0.25,
+      "max": 32,
+      "default": 4
+    },
+    {
+      "key": "osc3_fm_op4_level",
+      "name": "OSC 3 OP4 Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.2
+    },
+    {
+      "key": "osc3_fm_op5_ratio",
+      "name": "OSC 3 OP5 Ratio",
+      "min": 0.25,
+      "max": 32,
+      "default": 5
+    },
+    {
+      "key": "osc3_fm_op5_level",
+      "name": "OSC 3 OP5 Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.1
+    },
+    {
+      "key": "osc3_fm_op6_ratio",
+      "name": "OSC 3 OP6 Ratio",
+      "min": 0.25,
+      "max": 32,
+      "default": 6
+    },
+    {
+      "key": "osc3_fm_op6_level",
+      "name": "OSC 3 OP6 Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.1
     }
   ]
 }
