@@ -29,6 +29,11 @@ struct Instance {
     float filter_env_amount = 0.0f, filter_env_attack = 0.01f, filter_env_decay = 0.2f;
     float filter_env_sustain = 0.0f, filter_env_release = 0.2f;
     float osc1_mode = 0.0f, osc2_mode = 0.0f, osc3_mode = 0.0f;
+    float engine_type[3] = {0,0,0};
+    float va_pw[3] = {0.5f,0.5f,0.5f};
+    float va_detune[3] = {0.08f,0.08f,0.08f};
+    float fm_ratio[3] = {2,2,2};
+    float fm_index[3] = {1,1,1};
     float grain_size = 100.0f, grain_density = 12.0f, grain_position = 0.5f;
     float grain_spray = 0.0f, grain_pitch = 0.0f, grain_reverse = 0.0f, grain_mix = 1.0f;
     Instance() { synth.prepare(44100.0); }
@@ -85,6 +90,13 @@ float* param(Instance& i, const char* key) {
     if (!std::strcmp(key,"filter_env_decay")) return &i.filter_env_decay;
     if (!std::strcmp(key,"filter_env_sustain")) return &i.filter_env_sustain;
     if (!std::strcmp(key,"filter_env_release")) return &i.filter_env_release;
+    for (int n=0;n<3;++n) { char name[32];
+        std::snprintf(name,sizeof(name),"osc%d_engine",n+1); if (!std::strcmp(key,name)) return &i.engine_type[n];
+        std::snprintf(name,sizeof(name),"osc%d_va_pw",n+1); if (!std::strcmp(key,name)) return &i.va_pw[n];
+        std::snprintf(name,sizeof(name),"osc%d_va_detune",n+1); if (!std::strcmp(key,name)) return &i.va_detune[n];
+        std::snprintf(name,sizeof(name),"osc%d_fm_ratio",n+1); if (!std::strcmp(key,name)) return &i.fm_ratio[n];
+        std::snprintf(name,sizeof(name),"osc%d_fm_index",n+1); if (!std::strcmp(key,name)) return &i.fm_index[n];
+    }
     if (!std::strcmp(key,"osc1_mode")) return &i.osc1_mode;
     if (!std::strcmp(key,"osc2_mode")) return &i.osc2_mode;
     if (!std::strcmp(key,"osc3_mode")) return &i.osc3_mode;
@@ -142,6 +154,13 @@ void set_param(void* p, const char* key, const char* val) {
     i.synth.setFilterEnvDecay(i.filter_env_decay);
     i.synth.setFilterEnvSustain(i.filter_env_sustain);
     i.synth.setFilterEnvRelease(i.filter_env_release);
+    for (int n=0;n<3;++n) {
+        i.synth.setEngineType(n,i.engine_type[n]);
+        i.synth.setVaPulseWidth(n,i.va_pw[n]);
+        i.synth.setVaDetune(n,i.va_detune[n]);
+        i.synth.setFmRatio(n,i.fm_ratio[n]);
+        i.synth.setFmIndex(n,i.fm_index[n]);
+    }
     i.synth.setGranularMode(0,i.osc1_mode);
     i.synth.setGranularMode(1,i.osc2_mode);
     i.synth.setGranularMode(2,i.osc3_mode);
