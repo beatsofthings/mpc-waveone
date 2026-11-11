@@ -1633,6 +1633,93 @@
       "min": 0.5,
       "max": 12,
       "default": 0.707
+    },
+    {
+      "key": "osc1_wt_warp_mode",
+      "name": "OSC 1 Warp Mode",
+      "options": [
+        "OFF",
+        "BEND +",
+        "BEND -",
+        "PHASE BEND",
+        "SYNC",
+        "PHASE SHIFT"
+      ],
+      "default": 0
+    },
+    {
+      "key": "osc1_wt_warp_amount",
+      "name": "OSC 1 Warp Amount",
+      "min": 0,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "osc1_va_sync",
+      "name": "OSC 1 VA Sync",
+      "options": [
+        "OFF",
+        "ON"
+      ],
+      "default": 0
+    },
+    {
+      "key": "osc2_wt_warp_mode",
+      "name": "OSC 2 Warp Mode",
+      "options": [
+        "OFF",
+        "BEND +",
+        "BEND -",
+        "PHASE BEND",
+        "SYNC",
+        "PHASE SHIFT"
+      ],
+      "default": 0
+    },
+    {
+      "key": "osc2_wt_warp_amount",
+      "name": "OSC 2 Warp Amount",
+      "min": 0,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "osc2_va_sync",
+      "name": "OSC 2 VA Sync",
+      "options": [
+        "OFF",
+        "ON"
+      ],
+      "default": 0
+    },
+    {
+      "key": "osc3_wt_warp_mode",
+      "name": "OSC 3 Warp Mode",
+      "options": [
+        "OFF",
+        "BEND +",
+        "BEND -",
+        "PHASE BEND",
+        "SYNC",
+        "PHASE SHIFT"
+      ],
+      "default": 0
+    },
+    {
+      "key": "osc3_wt_warp_amount",
+      "name": "OSC 3 Warp Amount",
+      "min": 0,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "osc3_va_sync",
+      "name": "OSC 3 VA Sync",
+      "options": [
+        "OFF",
+        "ON"
+      ],
+      "default": 0
     }
   ]
 }
