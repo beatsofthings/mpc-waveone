@@ -23,6 +23,9 @@ struct Instance {
     float osc1_wave = 0.0f, osc2_wave = 0.0f, osc3_wave = 0.0f;
     float sub_level = 0.0f, cutoff = 18000.0f, resonance = 0.0f;
     float lfo1_rate = 2.0f, lfo1_depth = 0.0f;
+    float lfo2_rate = 0.5f, lfo2_depth = 0.0f, lfo2_target = 0.0f;
+    float filter_env_amount = 0.0f, filter_env_attack = 0.01f, filter_env_decay = 0.2f;
+    float filter_env_sustain = 0.0f, filter_env_release = 0.2f;
     Instance() { synth.prepare(44100.0); }
 };
 void* create(const char*) { return new (std::nothrow) Instance(); }
@@ -64,6 +67,14 @@ float* param(Instance& i, const char* key) {
     if (!std::strcmp(key,"resonance")) return &i.resonance;
     if (!std::strcmp(key,"lfo1_rate")) return &i.lfo1_rate;
     if (!std::strcmp(key,"lfo1_depth")) return &i.lfo1_depth;
+    if (!std::strcmp(key,"lfo2_rate")) return &i.lfo2_rate;
+    if (!std::strcmp(key,"lfo2_depth")) return &i.lfo2_depth;
+    if (!std::strcmp(key,"lfo2_target")) return &i.lfo2_target;
+    if (!std::strcmp(key,"filter_env_amount")) return &i.filter_env_amount;
+    if (!std::strcmp(key,"filter_env_attack")) return &i.filter_env_attack;
+    if (!std::strcmp(key,"filter_env_decay")) return &i.filter_env_decay;
+    if (!std::strcmp(key,"filter_env_sustain")) return &i.filter_env_sustain;
+    if (!std::strcmp(key,"filter_env_release")) return &i.filter_env_release;
     return nullptr;
 }
 void set_param(void* p, const char* key, const char* val) {
@@ -98,6 +109,14 @@ void set_param(void* p, const char* key, const char* val) {
     i.synth.setFilterResonance(i.resonance);
     i.synth.setLfoRate(i.lfo1_rate);
     i.synth.setLfoDepth(i.lfo1_depth);
+    i.synth.setLfo2Rate(i.lfo2_rate);
+    i.synth.setLfo2Depth(i.lfo2_depth);
+    i.synth.setLfo2Target(i.lfo2_target);
+    i.synth.setFilterEnvAmount(i.filter_env_amount);
+    i.synth.setFilterEnvAttack(i.filter_env_attack);
+    i.synth.setFilterEnvDecay(i.filter_env_decay);
+    i.synth.setFilterEnvSustain(i.filter_env_sustain);
+    i.synth.setFilterEnvRelease(i.filter_env_release);
 }
 int get_param(void* p, const char* key, char* buf, int len) {
     if (!p || !key || !buf || len < 2) return 0;
