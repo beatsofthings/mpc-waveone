@@ -19,7 +19,8 @@ struct Instance {
     float sustain = 0.7f, release = 0.25f, gain = 0.2f;
     float osc2_position = 0.0f, osc2_level = 0.0f, osc2_tune = 0.0f;
     float osc3_position = 0.0f, osc3_level = 0.0f, osc3_tune = 0.0f;
-    float osc1_on = 1.0f, osc2_on = 1.0f, osc3_on = 1.0f;
+    float osc1_on = 1.0f, osc2_on = 0.0f, osc3_on = 0.0f;
+    float osc1_wave = 0.0f, osc2_wave = 0.0f, osc3_wave = 0.0f;
     float sub_level = 0.0f, cutoff = 18000.0f, resonance = 0.0f;
     float lfo1_rate = 2.0f, lfo1_depth = 0.0f;
     Instance() { synth.prepare(44100.0); }
@@ -53,6 +54,9 @@ float* param(Instance& i, const char* key) {
     if (!std::strcmp(key,"osc3_level")) return &i.osc3_level;
     if (!std::strcmp(key,"osc3_tune")) return &i.osc3_tune;
     if (!std::strcmp(key,"osc1_on")) return &i.osc1_on;
+    if (!std::strcmp(key,"osc1_wave")) return &i.osc1_wave;
+    if (!std::strcmp(key,"osc2_wave")) return &i.osc2_wave;
+    if (!std::strcmp(key,"osc3_wave")) return &i.osc3_wave;
     if (!std::strcmp(key,"osc2_on")) return &i.osc2_on;
     if (!std::strcmp(key,"osc3_on")) return &i.osc3_on;
     if (!std::strcmp(key,"sub_level")) return &i.sub_level;
@@ -86,6 +90,9 @@ void set_param(void* p, const char* key, const char* val) {
     i.synth.setOscEnabled(0,i.osc1_on);
     i.synth.setOscEnabled(1,i.osc2_on);
     i.synth.setOscEnabled(2,i.osc3_on);
+    i.synth.setOscWave(0,i.osc1_wave);
+    i.synth.setOscWave(1,i.osc2_wave);
+    i.synth.setOscWave(2,i.osc3_wave);
     i.synth.setSubLevel(i.sub_level);
     i.synth.setFilterCutoff(i.cutoff);
     i.synth.setFilterResonance(i.resonance);
