@@ -45,6 +45,50 @@
       "min": 0,
       "max": 1,
       "default": 0.2
+    },
+    {
+      "key": "osc2_position",
+      "name": "OSC 2 Wave",
+      "min": 0,
+      "max": 2,
+      "default": 0
+    },
+    {
+      "key": "osc2_level",
+      "name": "OSC 2 Level",
+      "min": 0,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "osc2_tune",
+      "name": "OSC 2 Tune",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "unit": "st"
+    },
+    {
+      "key": "osc3_position",
+      "name": "OSC 3 Wave",
+      "min": 0,
+      "max": 2,
+      "default": 0
+    },
+    {
+      "key": "osc3_level",
+      "name": "OSC 3 Level",
+      "min": 0,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "osc3_tune",
+      "name": "OSC 3 Tune",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "unit": "st"
     }
   ]
 }
