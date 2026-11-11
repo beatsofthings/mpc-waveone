@@ -24,6 +24,10 @@ public:
     void setWtWarpMode(int osc, float mode) noexcept;
     void setWtWarpAmount(int osc, float amount) noexcept;
     void setVaSync(int osc, float enabled) noexcept;
+    void setVaMix(int osc, float mix) noexcept;
+    void setVaSub(int osc, float level) noexcept;
+    void setVaPwmRate(int osc, float hz) noexcept;
+    void setVaPwmDepth(int osc, float depth) noexcept;
     void setSubLevel(float level) noexcept;
     void setFilterMode(float mode) noexcept;
     void setFilterQ(float q) noexcept;
@@ -77,7 +81,7 @@ public:
     void render(float* left, float* right, std::size_t frames) noexcept;
 private:
     struct Grain { double phase = 0.0, step = 0.0; int age = 0, length = 0; bool active = false; };
-    struct Voice { std::array<std::array<Grain,8>,3> grains{}; std::array<double,3> grainClock{{0,0,0}}; std::uint32_t rng = 0x12345678u; int note = -1; std::array<double,3> phase{{0.0,0.0,0.0}}; double phaseStep = 0.0; double subPhase = 0.0; std::array<double,3> vaPhase{{0,0,0}}; std::array<std::array<double,6>,3> fmOpPhase{}; std::array<float,3> fmLast{{0,0,0}}; float filterState = 0.0f; float filterIc1 = 0.0f, filterIc2 = 0.0f; float filterEnv = 0.0f; float filterReleaseStep = 0.0f; float env = 0.0f; float velocity = 0.0f; std::uint64_t started = 0; enum Stage { Off, Attack, Decay, Sustain, Release } stage = Off; float releaseStep = 0.0f; };
+    struct Voice { std::array<std::array<Grain,8>,3> grains{}; std::array<double,3> grainClock{{0,0,0}}; std::uint32_t rng = 0x12345678u; int note = -1; std::array<double,3> phase{{0.0,0.0,0.0}}; double phaseStep = 0.0; double subPhase = 0.0; std::array<double,3> vaPhase{{0,0,0}}; std::array<double,3> vaPwmPhase{{0,0,0}}; std::array<std::array<double,6>,3> fmOpPhase{}; std::array<float,3> fmLast{{0,0,0}}; float filterState = 0.0f; float filterIc1 = 0.0f, filterIc2 = 0.0f; float filterEnv = 0.0f; float filterReleaseStep = 0.0f; float env = 0.0f; float velocity = 0.0f; std::uint64_t started = 0; enum Stage { Off, Attack, Decay, Sustain, Release } stage = Off; float releaseStep = 0.0f; };
     std::array<Voice, kVoices> voices_{};
     std::array<std::array<float, kTableSize>, 6> tables_{};
     std::array<std::array<float,kTableSize>,3> userWave_{};
@@ -96,6 +100,8 @@ private:
     std::array<int,3> wtWarpMode_{{0,0,0}};
     std::array<float,3> wtWarpAmount_{{0,0,0}};
     std::array<float,3> vaSync_{{0,0,0}};
+    std::array<float,3> vaMix_{{0.45f,0.45f,0.45f}},vaSub_{{0,0,0}};
+    std::array<float,3> vaPwmRate_{{0.5f,0.5f,0.5f}},vaPwmDepth_{{0,0,0}};
     std::array<float,3> granularMode_{{0.0f,0.0f,0.0f}};
     std::array<int,3> engineType_{{0,0,0}};
     std::array<int,16> matrixSource_{};
