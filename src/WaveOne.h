@@ -62,7 +62,7 @@ public:
     void render(float* left, float* right, std::size_t frames) noexcept;
 private:
     struct Grain { double phase = 0.0, step = 0.0; int age = 0, length = 0; bool active = false; };
-    struct Voice { std::array<Grain,8> grains{}; double grainClock = 0.0; std::uint32_t rng = 0x12345678u; int note = -1; std::array<double,3> phase{{0.0,0.0,0.0}}; double phaseStep = 0.0; double subPhase = 0.0; std::array<double,3> vaPhase{{0,0,0}}; std::array<double,3> fmPhase{{0,0,0}}; float filterState = 0.0f; float filterEnv = 0.0f; float filterReleaseStep = 0.0f; float env = 0.0f; float velocity = 0.0f; std::uint64_t started = 0; enum Stage { Off, Attack, Decay, Sustain, Release } stage = Off; float releaseStep = 0.0f; };
+    struct Voice { std::array<std::array<Grain,8>,3> grains{}; std::array<double,3> grainClock{{0,0,0}}; std::uint32_t rng = 0x12345678u; int note = -1; std::array<double,3> phase{{0.0,0.0,0.0}}; double phaseStep = 0.0; double subPhase = 0.0; std::array<double,3> vaPhase{{0,0,0}}; std::array<double,3> fmPhase{{0,0,0}}; float filterState = 0.0f; float filterEnv = 0.0f; float filterReleaseStep = 0.0f; float env = 0.0f; float velocity = 0.0f; std::uint64_t started = 0; enum Stage { Off, Attack, Decay, Sustain, Release } stage = Off; float releaseStep = 0.0f; };
     std::array<Voice, kVoices> voices_{};
     std::array<std::array<float, kTableSize>, 6> tables_{};
     double sampleRate_ = 48000.0;
