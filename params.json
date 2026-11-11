@@ -592,6 +592,518 @@
       "min": 0,
       "max": 12,
       "default": 1
+    },
+    {
+      "key": "matrix_01_source",
+      "name": "M01 Source",
+      "options": [
+        "OFF",
+        "LFO1",
+        "LFO2",
+        "LFO3",
+        "LFO4",
+        "VELOCITY",
+        "KEYTRACK"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_01_dest",
+      "name": "M01 Destination",
+      "options": [
+        "OFF",
+        "FILTER",
+        "PITCH",
+        "LEVEL"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_01_amount",
+      "name": "M01 Amount",
+      "min": -1,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "matrix_02_source",
+      "name": "M02 Source",
+      "options": [
+        "OFF",
+        "LFO1",
+        "LFO2",
+        "LFO3",
+        "LFO4",
+        "VELOCITY",
+        "KEYTRACK"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_02_dest",
+      "name": "M02 Destination",
+      "options": [
+        "OFF",
+        "FILTER",
+        "PITCH",
+        "LEVEL"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_02_amount",
+      "name": "M02 Amount",
+      "min": -1,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "matrix_03_source",
+      "name": "M03 Source",
+      "options": [
+        "OFF",
+        "LFO1",
+        "LFO2",
+        "LFO3",
+        "LFO4",
+        "VELOCITY",
+        "KEYTRACK"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_03_dest",
+      "name": "M03 Destination",
+      "options": [
+        "OFF",
+        "FILTER",
+        "PITCH",
+        "LEVEL"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_03_amount",
+      "name": "M03 Amount",
+      "min": -1,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "matrix_04_source",
+      "name": "M04 Source",
+      "options": [
+        "OFF",
+        "LFO1",
+        "LFO2",
+        "LFO3",
+        "LFO4",
+        "VELOCITY",
+        "KEYTRACK"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_04_dest",
+      "name": "M04 Destination",
+      "options": [
+        "OFF",
+        "FILTER",
+        "PITCH",
+        "LEVEL"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_04_amount",
+      "name": "M04 Amount",
+      "min": -1,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "matrix_05_source",
+      "name": "M05 Source",
+      "options": [
+        "OFF",
+        "LFO1",
+        "LFO2",
+        "LFO3",
+        "LFO4",
+        "VELOCITY",
+        "KEYTRACK"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_05_dest",
+      "name": "M05 Destination",
+      "options": [
+        "OFF",
+        "FILTER",
+        "PITCH",
+        "LEVEL"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_05_amount",
+      "name": "M05 Amount",
+      "min": -1,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "matrix_06_source",
+      "name": "M06 Source",
+      "options": [
+        "OFF",
+        "LFO1",
+        "LFO2",
+        "LFO3",
+        "LFO4",
+        "VELOCITY",
+        "KEYTRACK"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_06_dest",
+      "name": "M06 Destination",
+      "options": [
+        "OFF",
+        "FILTER",
+        "PITCH",
+        "LEVEL"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_06_amount",
+      "name": "M06 Amount",
+      "min": -1,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "matrix_07_source",
+      "name": "M07 Source",
+      "options": [
+        "OFF",
+        "LFO1",
+        "LFO2",
+        "LFO3",
+        "LFO4",
+        "VELOCITY",
+        "KEYTRACK"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_07_dest",
+      "name": "M07 Destination",
+      "options": [
+        "OFF",
+        "FILTER",
+        "PITCH",
+        "LEVEL"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_07_amount",
+      "name": "M07 Amount",
+      "min": -1,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "matrix_08_source",
+      "name": "M08 Source",
+      "options": [
+        "OFF",
+        "LFO1",
+        "LFO2",
+        "LFO3",
+        "LFO4",
+        "VELOCITY",
+        "KEYTRACK"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_08_dest",
+      "name": "M08 Destination",
+      "options": [
+        "OFF",
+        "FILTER",
+        "PITCH",
+        "LEVEL"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_08_amount",
+      "name": "M08 Amount",
+      "min": -1,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "matrix_09_source",
+      "name": "M09 Source",
+      "options": [
+        "OFF",
+        "LFO1",
+        "LFO2",
+        "LFO3",
+        "LFO4",
+        "VELOCITY",
+        "KEYTRACK"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_09_dest",
+      "name": "M09 Destination",
+      "options": [
+        "OFF",
+        "FILTER",
+        "PITCH",
+        "LEVEL"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_09_amount",
+      "name": "M09 Amount",
+      "min": -1,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "matrix_10_source",
+      "name": "M10 Source",
+      "options": [
+        "OFF",
+        "LFO1",
+        "LFO2",
+        "LFO3",
+        "LFO4",
+        "VELOCITY",
+        "KEYTRACK"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_10_dest",
+      "name": "M10 Destination",
+      "options": [
+        "OFF",
+        "FILTER",
+        "PITCH",
+        "LEVEL"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_10_amount",
+      "name": "M10 Amount",
+      "min": -1,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "matrix_11_source",
+      "name": "M11 Source",
+      "options": [
+        "OFF",
+        "LFO1",
+        "LFO2",
+        "LFO3",
+        "LFO4",
+        "VELOCITY",
+        "KEYTRACK"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_11_dest",
+      "name": "M11 Destination",
+      "options": [
+        "OFF",
+        "FILTER",
+        "PITCH",
+        "LEVEL"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_11_amount",
+      "name": "M11 Amount",
+      "min": -1,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "matrix_12_source",
+      "name": "M12 Source",
+      "options": [
+        "OFF",
+        "LFO1",
+        "LFO2",
+        "LFO3",
+        "LFO4",
+        "VELOCITY",
+        "KEYTRACK"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_12_dest",
+      "name": "M12 Destination",
+      "options": [
+        "OFF",
+        "FILTER",
+        "PITCH",
+        "LEVEL"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_12_amount",
+      "name": "M12 Amount",
+      "min": -1,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "matrix_13_source",
+      "name": "M13 Source",
+      "options": [
+        "OFF",
+        "LFO1",
+        "LFO2",
+        "LFO3",
+        "LFO4",
+        "VELOCITY",
+        "KEYTRACK"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_13_dest",
+      "name": "M13 Destination",
+      "options": [
+        "OFF",
+        "FILTER",
+        "PITCH",
+        "LEVEL"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_13_amount",
+      "name": "M13 Amount",
+      "min": -1,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "matrix_14_source",
+      "name": "M14 Source",
+      "options": [
+        "OFF",
+        "LFO1",
+        "LFO2",
+        "LFO3",
+        "LFO4",
+        "VELOCITY",
+        "KEYTRACK"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_14_dest",
+      "name": "M14 Destination",
+      "options": [
+        "OFF",
+        "FILTER",
+        "PITCH",
+        "LEVEL"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_14_amount",
+      "name": "M14 Amount",
+      "min": -1,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "matrix_15_source",
+      "name": "M15 Source",
+      "options": [
+        "OFF",
+        "LFO1",
+        "LFO2",
+        "LFO3",
+        "LFO4",
+        "VELOCITY",
+        "KEYTRACK"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_15_dest",
+      "name": "M15 Destination",
+      "options": [
+        "OFF",
+        "FILTER",
+        "PITCH",
+        "LEVEL"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_15_amount",
+      "name": "M15 Amount",
+      "min": -1,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "matrix_16_source",
+      "name": "M16 Source",
+      "options": [
+        "OFF",
+        "LFO1",
+        "LFO2",
+        "LFO3",
+        "LFO4",
+        "VELOCITY",
+        "KEYTRACK"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_16_dest",
+      "name": "M16 Destination",
+      "options": [
+        "OFF",
+        "FILTER",
+        "PITCH",
+        "LEVEL"
+      ],
+      "default": 0
+    },
+    {
+      "key": "matrix_16_amount",
+      "name": "M16 Amount",
+      "min": -1,
+      "max": 1,
+      "default": 0
     }
   ]
 }
