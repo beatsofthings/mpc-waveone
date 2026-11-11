@@ -17,6 +17,8 @@ struct Instance {
     waveone::Synth synth;
     float position = 0.0f, attack = 0.01f, decay = 0.12f;
     float sustain = 0.7f, release = 0.25f, gain = 0.2f;
+    float osc2_position = 0.0f, osc2_level = 0.0f, osc2_tune = 0.0f;
+    float osc3_position = 0.0f, osc3_level = 0.0f, osc3_tune = 0.0f;
     Instance() { synth.prepare(44100.0); }
 };
 void* create(const char*) { return new (std::nothrow) Instance(); }
@@ -41,6 +43,12 @@ float* param(Instance& i, const char* key) {
     if (!std::strcmp(key,"sustain")) return &i.sustain;
     if (!std::strcmp(key,"release")) return &i.release;
     if (!std::strcmp(key,"gain")) return &i.gain;
+    if (!std::strcmp(key,"osc2_position")) return &i.osc2_position;
+    if (!std::strcmp(key,"osc2_level")) return &i.osc2_level;
+    if (!std::strcmp(key,"osc2_tune")) return &i.osc2_tune;
+    if (!std::strcmp(key,"osc3_position")) return &i.osc3_position;
+    if (!std::strcmp(key,"osc3_level")) return &i.osc3_level;
+    if (!std::strcmp(key,"osc3_tune")) return &i.osc3_tune;
     return nullptr;
 }
 void set_param(void* p, const char* key, const char* val) {
@@ -58,6 +66,12 @@ void set_param(void* p, const char* key, const char* val) {
     i.synth.setSustain(i.sustain);
     i.synth.setRelease(i.release);
     i.synth.setGain(i.gain);
+    i.synth.setOscPosition(1,i.osc2_position);
+    i.synth.setOscLevel(1,i.osc2_level);
+    i.synth.setOscTune(1,i.osc2_tune);
+    i.synth.setOscPosition(2,i.osc3_position);
+    i.synth.setOscLevel(2,i.osc3_level);
+    i.synth.setOscTune(2,i.osc3_tune);
 }
 int get_param(void* p, const char* key, char* buf, int len) {
     if (!p || !key || !buf || len < 2) return 0;
