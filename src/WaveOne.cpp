@@ -106,6 +106,9 @@ void Synth::setMatrixAmount(int slot, float x) noexcept { if(slot>=0 && slot<16 
 void Synth::setEngineType(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) engineType_[osc] = std::max(0,std::min(3,static_cast<int>(std::lround(x)))); }
 void Synth::setVaWaveform(int osc, float x) noexcept { if(osc>=0&&osc<3&&std::isfinite(x)) vaWaveform_[osc]=std::max(0,std::min(4,static_cast<int>(std::lround(x)))); }
 void Synth::setVaNoise(int osc, float x) noexcept { if(osc>=0&&osc<3&&std::isfinite(x)) vaNoise_[osc]=clamp01(x); }
+void Synth::setFmAlgorithm(int osc, float x) noexcept { if(osc>=0&&osc<3&&std::isfinite(x)) fmAlgorithm_[osc]=std::max(0,std::min(3,static_cast<int>(std::lround(x)))); }
+void Synth::setFmOperatorRatio(int osc,int op,float x) noexcept { if(osc>=0&&osc<3&&op>=0&&op<6&&std::isfinite(x)) fmOpRatio_[osc][op]=std::max(0.25f,std::min(32.0f,x)); }
+void Synth::setFmOperatorLevel(int osc,int op,float x) noexcept { if(osc>=0&&osc<3&&op>=0&&op<6&&std::isfinite(x)) fmOpLevel_[osc][op]=clamp01(x); }
 void Synth::setFmFeedback(int osc, float x) noexcept { if(osc>=0&&osc<3&&std::isfinite(x)) fmFeedback_[osc]=clamp01(x); }
 void Synth::setGrainWindow(int osc, float x) noexcept { if(osc>=0&&osc<3&&std::isfinite(x)) grainWindow_[osc]=std::max(0,std::min(3,static_cast<int>(std::lround(x)))); }
 void Synth::setVaPulseWidth(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) vaPulseWidth_[osc] = std::max(0.05f,std::min(x,0.95f)); }
@@ -228,12 +231,25 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
                     if(vaSync_[osc]>=0.5f && v.phase[osc]+v.phaseStep*vibrato>=1.0) v.vaPhase[osc]=0.0;
                     if (v.vaPhase[osc] >= 1.0) v.vaPhase[osc] -= std::floor(v.vaPhase[osc]);
                 } else if (engineType_[osc] == 3) {
-                    // Two-operator FM prototype; full DX7 six-operator engine is pending.
-                    const double mod = std::sin(2.0*pi*v.fmPhase[osc] + fmFeedback_[osc]*v.fmLast[osc]*6.0);
-                    v.fmLast[osc]=static_cast<float>(mod);
-                    voiceSample += static_cast<float>(std::sin(2.0*pi*v.phase[osc]+std::max(0.0f,fmIndex_[osc]+matrixFm[osc]*8.0f)*mod))*oscLevel_[osc];
-                    v.fmPhase[osc] += v.phaseStep*vibrato*fmRatio_[osc];
-                    if (v.fmPhase[osc] >= 1.0) v.fmPhase[osc] -= std::floor(v.fmPhase[osc]);
+                    // Six operator FM with four independent routing topologies.
+                    float op[6]={0,0,0,0,0,0};
+                    const float index=std::max(0.0f,fmIndex_[osc]+matrixFm[osc]*8.0f);
+                    for(int k=5;k>=0;--k) {
+                        float modulation=0.0f;
+                        if(fmAlgorithm_[osc]==0 && k<5) modulation=op[k+1]; // serial
+                        else if(fmAlgorithm_[osc]==1 && k==0) modulation=op[1]+op[2]+op[3]+op[4]+op[5]; // five modulators
+                        else if(fmAlgorithm_[osc]==2 && (k==0||k==3)) modulation=op[k+1]+op[k+2]; // two groups
+                        else if(fmAlgorithm_[osc]==3 && k==0) modulation=op[1]; // two carriers plus additive ops
+                        const float feedback=(k==5)?fmFeedback_[osc]*v.fmLast[osc]*6.0f:0.0f;
+                        op[k]=fmOpLevel_[osc][k]*static_cast<float>(std::sin(2.0*pi*v.fmOpPhase[osc][k]+index*modulation+feedback));
+                        v.fmOpPhase[osc][k]+=v.phaseStep*vibrato*fmOpRatio_[osc][k]*(k==1?fmRatio_[osc]:1.0f);
+                        if(v.fmOpPhase[osc][k]>=1.0) v.fmOpPhase[osc][k]-=std::floor(v.fmOpPhase[osc][k]);
+                    }
+                    v.fmLast[osc]=op[5];
+                    float fmOut=op[0];
+                    if(fmAlgorithm_[osc]==2) fmOut=0.5f*(op[0]+op[3]);
+                    else if(fmAlgorithm_[osc]==3) fmOut=(op[0]+op[2]+op[3]+op[4]+op[5])*0.2f;
+                    voiceSample+=fmOut*oscLevel_[osc];
                 } else if (engineType_[osc] == 1 || granularMode_[osc] >= 0.5f) {
                     v.grainClock[osc] += std::max(1.0f,grainParams_[osc][1] * std::pow(2.0f,matrixGrain[osc]*3.0f)) / sampleRate_;
                     if (v.grainClock[osc] >= 1.0) {
