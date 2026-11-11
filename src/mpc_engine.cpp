@@ -32,6 +32,7 @@ struct Instance {
     float osc1_mode = 0.0f, osc2_mode = 0.0f, osc3_mode = 0.0f;
     float engine_type[3] = {0,0,0};
     float matrix_source[16] = {}, matrix_dest[16] = {}, matrix_amount[16] = {};
+    float va_wave[3] = {0,0,0}, va_noise[3] = {0,0,0}, fm_feedback[3] = {0,0,0}, grain_window[3] = {0,0,0};
     float va_pw[3] = {0.5f,0.5f,0.5f};
     float va_detune[3] = {0.08f,0.08f,0.08f};
     float fm_ratio[3] = {2,2,2};
@@ -101,6 +102,10 @@ float* param(Instance& i, const char* key) {
     }
     for (int n=0;n<3;++n) { char name[32];
         std::snprintf(name,sizeof(name),"osc%d_engine",n+1); if (!std::strcmp(key,name)) return &i.engine_type[n];
+        std::snprintf(name,sizeof(name),"osc%d_va_wave",n+1); if (!std::strcmp(key,name)) return &i.va_wave[n];
+        std::snprintf(name,sizeof(name),"osc%d_va_noise",n+1); if (!std::strcmp(key,name)) return &i.va_noise[n];
+        std::snprintf(name,sizeof(name),"osc%d_fm_feedback",n+1); if (!std::strcmp(key,name)) return &i.fm_feedback[n];
+        std::snprintf(name,sizeof(name),"osc%d_grain_window",n+1); if (!std::strcmp(key,name)) return &i.grain_window[n];
         std::snprintf(name,sizeof(name),"osc%d_va_pw",n+1); if (!std::strcmp(key,name)) return &i.va_pw[n];
         std::snprintf(name,sizeof(name),"osc%d_va_detune",n+1); if (!std::strcmp(key,name)) return &i.va_detune[n];
         std::snprintf(name,sizeof(name),"osc%d_fm_ratio",n+1); if (!std::strcmp(key,name)) return &i.fm_ratio[n];
@@ -172,6 +177,10 @@ void set_param(void* p, const char* key, const char* val) {
     }
     for (int n=0;n<3;++n) {
         i.synth.setEngineType(n,i.engine_type[n]);
+        i.synth.setVaWaveform(n,i.va_wave[n]);
+        i.synth.setVaNoise(n,i.va_noise[n]);
+        i.synth.setFmFeedback(n,i.fm_feedback[n]);
+        i.synth.setGrainWindow(n,i.grain_window[n]);
         i.synth.setVaPulseWidth(n,i.va_pw[n]);
         i.synth.setVaDetune(n,i.va_detune[n]);
         i.synth.setFmRatio(n,i.fm_ratio[n]);
