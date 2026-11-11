@@ -39,6 +39,9 @@ public:
     void setFilterEnvRelease(float seconds) noexcept;
     void setGranularMode(int osc, float mode) noexcept;
     void setEngineType(int osc, float type) noexcept;
+    void setMatrixSource(int slot, float value) noexcept;
+    void setMatrixDestination(int slot, float value) noexcept;
+    void setMatrixAmount(int slot, float value) noexcept;
     void setVaPulseWidth(int osc, float width) noexcept;
     void setVaDetune(int osc, float semitones) noexcept;
     void setFmRatio(int osc, float ratio) noexcept;
@@ -69,6 +72,9 @@ private:
     std::array<int,3> oscWave_{{0,0,0}};
     std::array<float,3> granularMode_{{0.0f,0.0f,0.0f}};
     std::array<int,3> engineType_{{0,0,0}};
+    std::array<int,16> matrixSource_{};
+    std::array<int,16> matrixDestination_{};
+    std::array<float,16> matrixAmount_{};
     std::array<float,3> vaPulseWidth_{{0.5f,0.5f,0.5f}};
     std::array<float,3> vaDetune_{{0.08f,0.08f,0.08f}};
     std::array<float,3> fmRatio_{{2.0f,2.0f,2.0f}};
