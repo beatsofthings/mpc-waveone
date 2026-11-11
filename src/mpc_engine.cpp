@@ -21,6 +21,7 @@ struct Instance {
     float osc3_position = 0.0f, osc3_level = 0.7f, osc3_tune = 0.0f;
     float osc1_on = 1.0f, osc2_on = 0.0f, osc3_on = 0.0f;
     float osc1_wave = 0.0f, osc2_wave = 0.0f, osc3_wave = 0.0f;
+    float wt_warp_mode[3]={0,0,0}, wt_warp_amount[3]={0,0,0}, va_sync[3]={0,0,0};
     float sub_level = 0.0f, cutoff = 18000.0f, resonance = 0.0f;
     float filter_mode = 0.0f, filter_q = 0.707f;
     float lfo1_rate = 2.0f, lfo1_depth = 0.0f;
@@ -105,6 +106,9 @@ float* param(Instance& i, const char* key) {
     }
     for (int n=0;n<3;++n) { char name[32];
         std::snprintf(name,sizeof(name),"osc%d_engine",n+1); if (!std::strcmp(key,name)) return &i.engine_type[n];
+        std::snprintf(name,sizeof(name),"osc%d_wt_warp_mode",n+1); if (!std::strcmp(key,name)) return &i.wt_warp_mode[n];
+        std::snprintf(name,sizeof(name),"osc%d_wt_warp_amount",n+1); if (!std::strcmp(key,name)) return &i.wt_warp_amount[n];
+        std::snprintf(name,sizeof(name),"osc%d_va_sync",n+1); if (!std::strcmp(key,name)) return &i.va_sync[n];
         std::snprintf(name,sizeof(name),"osc%d_va_wave",n+1); if (!std::strcmp(key,name)) return &i.va_wave[n];
         std::snprintf(name,sizeof(name),"osc%d_va_noise",n+1); if (!std::strcmp(key,name)) return &i.va_noise[n];
         std::snprintf(name,sizeof(name),"osc%d_fm_feedback",n+1); if (!std::strcmp(key,name)) return &i.fm_feedback[n];
@@ -182,6 +186,9 @@ void set_param(void* p, const char* key, const char* val) {
     }
     for (int n=0;n<3;++n) {
         i.synth.setEngineType(n,i.engine_type[n]);
+        i.synth.setWtWarpMode(n,i.wt_warp_mode[n]);
+        i.synth.setWtWarpAmount(n,i.wt_warp_amount[n]);
+        i.synth.setVaSync(n,i.va_sync[n]);
         i.synth.setVaWaveform(n,i.va_wave[n]);
         i.synth.setVaNoise(n,i.va_noise[n]);
         i.synth.setFmFeedback(n,i.fm_feedback[n]);
