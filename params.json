@@ -1503,6 +1503,117 @@
       "min": 0,
       "max": 1,
       "default": 1
+    },
+    {
+      "key": "osc1_va_wave",
+      "name": "OSC 1 VA Wave",
+      "options": [
+        "SAW+PULSE",
+        "SAW",
+        "PULSE",
+        "TRIANGLE",
+        "SINE"
+      ],
+      "default": 0
+    },
+    {
+      "key": "osc1_va_noise",
+      "name": "OSC 1 Noise",
+      "min": 0,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "osc1_fm_feedback",
+      "name": "OSC 1 FM Feedback",
+      "min": 0,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "osc1_grain_window",
+      "name": "OSC 1 Grain Window",
+      "options": [
+        "HANN",
+        "TRIANGLE",
+        "SINE",
+        "TRAPEZOID"
+      ],
+      "default": 0
+    },
+    {
+      "key": "osc2_va_wave",
+      "name": "OSC 2 VA Wave",
+      "options": [
+        "SAW+PULSE",
+        "SAW",
+        "PULSE",
+        "TRIANGLE",
+        "SINE"
+      ],
+      "default": 0
+    },
+    {
+      "key": "osc2_va_noise",
+      "name": "OSC 2 Noise",
+      "min": 0,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "osc2_fm_feedback",
+      "name": "OSC 2 FM Feedback",
+      "min": 0,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "osc2_grain_window",
+      "name": "OSC 2 Grain Window",
+      "options": [
+        "HANN",
+        "TRIANGLE",
+        "SINE",
+        "TRAPEZOID"
+      ],
+      "default": 0
+    },
+    {
+      "key": "osc3_va_wave",
+      "name": "OSC 3 VA Wave",
+      "options": [
+        "SAW+PULSE",
+        "SAW",
+        "PULSE",
+        "TRIANGLE",
+        "SINE"
+      ],
+      "default": 0
+    },
+    {
+      "key": "osc3_va_noise",
+      "name": "OSC 3 Noise",
+      "min": 0,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "osc3_fm_feedback",
+      "name": "OSC 3 FM Feedback",
+      "min": 0,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "osc3_grain_window",
+      "name": "OSC 3 Grain Window",
+      "options": [
+        "HANN",
+        "TRIANGLE",
+        "SINE",
+        "TRAPEZOID"
+      ],
+      "default": 0
     }
   ]
 }
