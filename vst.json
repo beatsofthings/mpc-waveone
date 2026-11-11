@@ -20,5 +20,6 @@
     "libs": [
       "-lm"
     ]
-  }
+  },
+  "layout": "layout.conf"
 }
