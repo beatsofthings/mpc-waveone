@@ -15,6 +15,8 @@ extern "C" {
 namespace {
 struct Instance {
     waveone::Synth synth;
+    float factory_preset = 0.0f;
+    float lfo4_edit_enable = 0.0f, lfo4_selected_step = 0.0f;
     float position = 0.0f, attack = 0.01f, decay = 0.12f;
     float sustain = 0.7f, release = 0.25f, gain = 0.2f;
     float osc2_position = 0.0f, osc2_level = 0.7f, osc2_tune = 0.0f;
@@ -51,8 +53,19 @@ void* create(const char*) { return new (std::nothrow) Instance(); }
 void destroy(void* p) { delete static_cast<Instance*>(p); }
 void midi(void* p, const uint8_t* msg, int len) {
     if (!p || !msg || len < 1) return;
-    auto& s = static_cast<Instance*>(p)->synth;
+    auto& instance = *static_cast<Instance*>(p);
+    auto& s = instance.synth;
     const int type = msg[0] & 0xf0;
+    // Optional MIDI step editor: note 36..51 selects one of 16 LFO points.
+    // This works only if the host forwards the relevant pad/step MIDI messages.
+    if(instance.lfo4_edit_enable>=0.5f && type==0x90 && len>=3 && msg[2]>0 && msg[1]>=36 && msg[1]<=51) {
+        instance.lfo4_selected_step=static_cast<float>(msg[1]-36); return;
+    }
+    // CC 20: step selection, CC 21: vertical point position.
+    if(instance.lfo4_edit_enable>=0.5f && type==0xb0 && len>=3) {
+        if(msg[1]==20) { instance.lfo4_selected_step=static_cast<float>(std::min(15,(msg[2]&127)*16/128)); return; }
+        if(msg[1]==21) { int step=std::max(0,std::min(15,static_cast<int>(instance.lfo4_selected_step))); instance.lfo4_steps[step]=(msg[2]/127.0f)*2.0f-1.0f; s.setLfo4Step(step,instance.lfo4_steps[step]); return; }
+    }
     if (type == 0x90 && len >= 3) {
         if (msg[2]) s.noteOn(msg[1] & 127, (msg[2] & 127) / 127.0f);
         else s.noteOff(msg[1] & 127);
@@ -63,6 +76,9 @@ void midi(void* p, const uint8_t* msg, int len) {
     }
 }
 float* param(Instance& i, const char* key) {
+    if (!std::strcmp(key,"factory_preset")) return &i.factory_preset;
+    if (!std::strcmp(key,"lfo4_edit_enable")) return &i.lfo4_edit_enable;
+    if (!std::strcmp(key,"lfo4_selected_step")) return &i.lfo4_selected_step;
     if (!std::strcmp(key,"position")) return &i.position;
     if (!std::strcmp(key,"attack")) return &i.attack;
     if (!std::strcmp(key,"decay")) return &i.decay;
@@ -148,6 +164,26 @@ void set_param(void* p, const char* key, const char* val) {
     const float value = std::strtof(val,&end);
     if (end == val || !std::isfinite(value)) return;
     *dst = value;
+    if(!std::strcmp(key,"factory_preset")) {
+        // Preset 0 is INIT; presets 1..8 demonstrate combinations of the four engines.
+        const int preset=std::max(0,std::min(8,static_cast<int>(std::lround(value))));
+        i.osc1_on=1; i.osc2_on=0; i.osc3_on=0;
+        i.engine_type[0]=0; i.engine_type[1]=0; i.engine_type[2]=0;
+        i.osc1_wave=0; i.osc2_wave=0; i.osc3_wave=0;
+        i.osc2_level=.65f; i.osc3_level=.55f;
+        i.cutoff=12000; i.filter_q=.707f; i.filter_mode=0;
+        i.attack=.015f; i.decay=.25f; i.sustain=.75f; i.release=.35f;
+        i.wt_warp_mode[0]=0; i.wt_warp_amount[0]=0;
+        i.va_noise[0]=0; i.fm_index[0]=1.0f;
+        if(preset==1) { i.engine_type[0]=2; i.va_wave[0]=0; i.va_detune[0]=.13f; i.cutoff=4200; i.filter_q=1.2f; }
+        else if(preset==2) { i.engine_type[0]=3; i.fm_algorithm[0]=1; i.fm_index[0]=2.8f; i.attack=.005f; i.decay=.6f; i.sustain=.2f; }
+        else if(preset==3) { i.engine_type[0]=1; i.grain_per_osc[0][0]=180; i.grain_per_osc[0][1]=25; i.grain_per_osc[0][3]=.5f; i.attack=.4f; i.release=1.8f; }
+        else if(preset==4) { i.engine_type[0]=0; i.osc1_wave=2; i.wt_warp_mode[0]=3; i.wt_warp_amount[0]=.6f; i.cutoff=3000; }
+        else if(preset==5) { i.engine_type[0]=2; i.osc2_on=1; i.engine_type[1]=3; i.fm_index[1]=3.5f; i.cutoff=6200; }
+        else if(preset==6) { i.engine_type[0]=0; i.osc2_on=1; i.engine_type[1]=1; i.osc1_wave=6; i.grain_per_osc[1][0]=80; i.grain_per_osc[1][1]=30; i.attack=.3f; }
+        else if(preset==7) { i.engine_type[0]=3; i.osc2_on=1; i.engine_type[1]=0; i.osc3_on=1; i.engine_type[2]=2; i.fm_index[0]=2.2f; i.osc2_wave=4; i.cutoff=5400; }
+        else if(preset==8) { i.engine_type[0]=1; i.osc2_on=1; i.engine_type[1]=2; i.osc3_on=1; i.engine_type[2]=3; i.attack=.7f; i.release=2.0f; }
+    }
     i.synth.setPosition(i.position);
     i.synth.setAttack(i.attack);
     i.synth.setDecay(i.decay);
