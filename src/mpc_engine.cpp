@@ -73,8 +73,8 @@ void render(void* p, int16_t* out, int frames) {
         const int n = std::min(128, frames - offset);
         s.render(l,r,static_cast<size_t>(n));
         for (int j = 0; j < n; ++j) {
-            out[2*(offset+j)] = static_cast<int16_t>(std::lrint(std::clamp(l[j],-1.0f,1.0f)*32767.0f));
-            out[2*(offset+j)+1] = static_cast<int16_t>(std::lrint(std::clamp(r[j],-1.0f,1.0f)*32767.0f));
+            out[2*(offset+j)] = static_cast<int16_t>(std::lrint(std::max(-1.0f, std::min(l[j], 1.0f))*32767.0f));
+            out[2*(offset+j)+1] = static_cast<int16_t>(std::lrint(std::max(-1.0f, std::min(r[j], 1.0f))*32767.0f));
         }
     }
 }
