@@ -6,7 +6,7 @@
 namespace waveone {
 namespace {
 constexpr double pi = 3.14159265358979323846;
-float clamp01(float value) noexcept { return std::clamp(value, 0.0f, 1.0f); }
+float clamp01(float value) noexcept { return std::max(0.0f, std::min(value, 1.0f)); }
 }
 Synth::Synth() {
     // Basic prototype waveforms. Band-limited oscillator is an upcoming improvement.
@@ -44,11 +44,11 @@ void Synth::noteOff(int midiNote) noexcept {
     }
 }
 void Synth::allNotesOff() noexcept { for (auto& v : voices_) v = {}; }
-void Synth::setPosition(float x) noexcept { if (std::isfinite(x)) position_ = std::clamp(x, 0.0f, 2.0f); }
-void Synth::setAttack(float x) noexcept { if (std::isfinite(x)) attack_ = std::clamp(x, 0.001f, 10.0f); }
-void Synth::setDecay(float x) noexcept { if (std::isfinite(x)) decay_ = std::clamp(x, 0.001f, 10.0f); }
+void Synth::setPosition(float x) noexcept { if (std::isfinite(x)) position_ = std::max(0.0f, std::min(x, 2.0f)); }
+void Synth::setAttack(float x) noexcept { if (std::isfinite(x)) attack_ = std::max(0.001f, std::min(x, 10.0f)); }
+void Synth::setDecay(float x) noexcept { if (std::isfinite(x)) decay_ = std::max(0.001f, std::min(x, 10.0f)); }
 void Synth::setSustain(float x) noexcept { if (std::isfinite(x)) sustain_ = clamp01(x); }
-void Synth::setRelease(float x) noexcept { if (std::isfinite(x)) release_ = std::clamp(x, 0.001f, 10.0f); }
+void Synth::setRelease(float x) noexcept { if (std::isfinite(x)) release_ = std::max(0.001f, std::min(x, 10.0f)); }
 void Synth::setGain(float x) noexcept { if (std::isfinite(x)) gain_ = clamp01(x); }
 float Synth::sampleWave(double phase) const noexcept {
     const double wrapped = phase - std::floor(phase);
@@ -88,7 +88,7 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
             v.phase += v.phaseStep;
             if (v.phase >= 1.0) v.phase -= std::floor(v.phase);
         }
-        const float output = std::clamp(mixed * gain_, -1.0f, 1.0f);
+        const float output = std::max(-1.0f, std::min(mixed * gain_, 1.0f));
         left[i] = output;
         right[i] = output;
     }
