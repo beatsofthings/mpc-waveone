@@ -26,6 +26,9 @@ struct Instance {
     float lfo2_rate = 0.5f, lfo2_depth = 0.0f, lfo2_target = 0.0f;
     float filter_env_amount = 0.0f, filter_env_attack = 0.01f, filter_env_decay = 0.2f;
     float filter_env_sustain = 0.0f, filter_env_release = 0.2f;
+    float osc1_mode = 0.0f, osc2_mode = 0.0f, osc3_mode = 0.0f;
+    float grain_size = 100.0f, grain_density = 12.0f, grain_position = 0.5f;
+    float grain_spray = 0.0f, grain_pitch = 0.0f, grain_reverse = 0.0f, grain_mix = 1.0f;
     Instance() { synth.prepare(44100.0); }
 };
 void* create(const char*) { return new (std::nothrow) Instance(); }
@@ -75,6 +78,16 @@ float* param(Instance& i, const char* key) {
     if (!std::strcmp(key,"filter_env_decay")) return &i.filter_env_decay;
     if (!std::strcmp(key,"filter_env_sustain")) return &i.filter_env_sustain;
     if (!std::strcmp(key,"filter_env_release")) return &i.filter_env_release;
+    if (!std::strcmp(key,"osc1_mode")) return &i.osc1_mode;
+    if (!std::strcmp(key,"osc2_mode")) return &i.osc2_mode;
+    if (!std::strcmp(key,"osc3_mode")) return &i.osc3_mode;
+    if (!std::strcmp(key,"grain_size")) return &i.grain_size;
+    if (!std::strcmp(key,"grain_density")) return &i.grain_density;
+    if (!std::strcmp(key,"grain_position")) return &i.grain_position;
+    if (!std::strcmp(key,"grain_spray")) return &i.grain_spray;
+    if (!std::strcmp(key,"grain_pitch")) return &i.grain_pitch;
+    if (!std::strcmp(key,"grain_reverse")) return &i.grain_reverse;
+    if (!std::strcmp(key,"grain_mix")) return &i.grain_mix;
     return nullptr;
 }
 void set_param(void* p, const char* key, const char* val) {
@@ -117,6 +130,16 @@ void set_param(void* p, const char* key, const char* val) {
     i.synth.setFilterEnvDecay(i.filter_env_decay);
     i.synth.setFilterEnvSustain(i.filter_env_sustain);
     i.synth.setFilterEnvRelease(i.filter_env_release);
+    i.synth.setGranularMode(0,i.osc1_mode);
+    i.synth.setGranularMode(1,i.osc2_mode);
+    i.synth.setGranularMode(2,i.osc3_mode);
+    i.synth.setGrainSize(i.grain_size);
+    i.synth.setGrainDensity(i.grain_density);
+    i.synth.setGrainPosition(i.grain_position);
+    i.synth.setGrainSpray(i.grain_spray);
+    i.synth.setGrainPitch(i.grain_pitch);
+    i.synth.setGrainReverse(i.grain_reverse);
+    i.synth.setGrainMix(i.grain_mix);
 }
 int get_param(void* p, const char* key, char* buf, int len) {
     if (!p || !key || !buf || len < 2) return 0;
