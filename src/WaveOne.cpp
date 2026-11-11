@@ -53,6 +53,12 @@ void Synth::setGain(float x) noexcept { if (std::isfinite(x)) gain_ = clamp01(x)
 void Synth::setOscPosition(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) oscPosition_[osc] = std::max(0.0f, std::min(x, 2.0f)); }
 void Synth::setOscLevel(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) oscLevel_[osc] = clamp01(x); }
 void Synth::setOscTune(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) oscTune_[osc] = std::max(-24.0f, std::min(x, 24.0f)); }
+void Synth::setOscEnabled(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) oscEnabled_[osc] = x >= 0.5f ? 1.0f : 0.0f; }
+void Synth::setSubLevel(float x) noexcept { if (std::isfinite(x)) subLevel_ = clamp01(x); }
+void Synth::setFilterCutoff(float x) noexcept { if (std::isfinite(x)) cutoff_ = std::max(30.0f, std::min(x, 18000.0f)); }
+void Synth::setFilterResonance(float x) noexcept { if (std::isfinite(x)) resonance_ = clamp01(x); }
+void Synth::setLfoRate(float x) noexcept { if (std::isfinite(x)) lfoRate_ = std::max(0.01f, std::min(x, 20.0f)); }
+void Synth::setLfoDepth(float x) noexcept { if (std::isfinite(x)) lfoDepth_ = std::max(0.0f, std::min(x, 12.0f)); }
 float Synth::sampleWave(double phase, float position) const noexcept {
     const double wrapped = phase - std::floor(phase);
     const double idx = wrapped * kTableSize;
@@ -69,6 +75,9 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
     if (!left || !right) return;
     for (std::size_t i = 0; i < frames; ++i) {
         float mixed = 0.0f;
+        const double vibrato = std::pow(2.0, std::sin(lfoPhase_ * 2.0 * pi) * lfoDepth_ / 12.0);
+        lfoPhase_ += lfoRate_ / sampleRate_;
+        if (lfoPhase_ >= 1.0) lfoPhase_ -= std::floor(lfoPhase_);
         for (auto& v : voices_) {
             if (v.stage == Voice::Off) continue;
             switch (v.stage) {
@@ -89,12 +98,20 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
             }
             float voiceSample = 0.0f;
             for (int osc = 0; osc < 3; ++osc) {
-                if (oscLevel_[osc] <= 0.0f) continue;
+                if (oscLevel_[osc] <= 0.0f || oscEnabled_[osc] < 0.5f) continue;
                 voiceSample += sampleWave(v.phase[osc], oscPosition_[osc]) * oscLevel_[osc];
-                v.phase[osc] += v.phaseStep * std::pow(2.0, oscTune_[osc] / 12.0);
+                v.phase[osc] += v.phaseStep * vibrato * std::pow(2.0, oscTune_[osc] / 12.0);
                 if (v.phase[osc] >= 1.0) v.phase[osc] -= std::floor(v.phase[osc]);
             }
-            mixed += voiceSample * v.env * v.velocity;
+            v.subPhase += v.phaseStep * 0.5 * vibrato;
+            if (v.subPhase >= 1.0) v.subPhase -= std::floor(v.subPhase);
+            voiceSample += subLevel_ * std::sin(2.0 * pi * v.subPhase);
+            // Stable one-pole low-pass; resonance controls a mild pre-filter drive.
+            const float drive = 1.0f + 2.0f * resonance_;
+            const float input = std::tanh(voiceSample * drive) / drive;
+            const float alpha = static_cast<float>(1.0 - std::exp(-2.0 * pi * cutoff_ / sampleRate_));
+            v.filterState += alpha * (input - v.filterState);
+            mixed += v.filterState * v.env * v.velocity;
         }
         const float output = std::max(-1.0f, std::min(mixed * gain_, 1.0f));
         left[i] = output;
