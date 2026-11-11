@@ -18,6 +18,7 @@ Synth::Synth() {
         tables_[3][i] = static_cast<float>(1.0 - 4.0 * std::abs(phase - 0.5)); // triangle
         tables_[4][i] = phase < 0.25 ? 1.0f : -1.0f; // pulse 25%
         tables_[5][i] = static_cast<float>(0.6 * std::sin(2.0*pi*phase) + 0.3 * std::sin(6.0*pi*phase) + 0.1 * std::sin(10.0*pi*phase)); // organ
+        grainSource_[i] = static_cast<float>(0.5*std::sin(2.0*pi*phase*7.0) + 0.25*std::sin(2.0*pi*phase*11.0) + 0.2*std::sin(2.0*pi*phase*19.0));
     }
 }
 void Synth::prepare(double sampleRate) noexcept {
@@ -39,6 +40,7 @@ void Synth::noteOn(int midiNote, float velocity) noexcept {
     slot->velocity = clamp01(velocity);
     slot->stage = Voice::Attack;
     slot->started = ++counter_;
+    slot->rng = 0x9e3779b9u ^ static_cast<std::uint32_t>(midiNote*7919 + counter_);
 }
 void Synth::noteOff(int midiNote) noexcept {
     for (auto& v : voices_) if (v.note == midiNote && v.stage != Voice::Off && v.stage != Voice::Release) {
@@ -72,6 +74,14 @@ void Synth::setFilterEnvAttack(float x) noexcept { if (std::isfinite(x)) filterE
 void Synth::setFilterEnvDecay(float x) noexcept { if (std::isfinite(x)) filterEnvDecay_ = std::max(0.001f, std::min(x, 10.0f)); }
 void Synth::setFilterEnvSustain(float x) noexcept { if (std::isfinite(x)) filterEnvSustain_ = clamp01(x); }
 void Synth::setFilterEnvRelease(float x) noexcept { if (std::isfinite(x)) filterEnvRelease_ = std::max(0.001f, std::min(x, 10.0f)); }
+void Synth::setGranularMode(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) granularMode_[osc] = x >= 0.5f ? 1.0f : 0.0f; }
+void Synth::setGrainSize(float x) noexcept { if (std::isfinite(x)) grainSize_ = std::max(5.0f,std::min(x,500.0f)); }
+void Synth::setGrainDensity(float x) noexcept { if (std::isfinite(x)) grainDensity_ = std::max(1.0f,std::min(x,80.0f)); }
+void Synth::setGrainPosition(float x) noexcept { if (std::isfinite(x)) grainPosition_ = clamp01(x); }
+void Synth::setGrainSpray(float x) noexcept { if (std::isfinite(x)) grainSpray_ = clamp01(x); }
+void Synth::setGrainPitch(float x) noexcept { if (std::isfinite(x)) grainPitch_ = std::max(-24.0f,std::min(x,24.0f)); }
+void Synth::setGrainReverse(float x) noexcept { if (std::isfinite(x)) grainReverse_ = clamp01(x); }
+void Synth::setGrainMix(float x) noexcept { if (std::isfinite(x)) grainMix_ = clamp01(x); }
 float Synth::sampleWave(double phase, float position, int wave) const noexcept {
     const double wrapped = phase - std::floor(phase);
     const double idx = wrapped * kTableSize;
@@ -115,7 +125,30 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
             float voiceSample = 0.0f;
             for (int osc = 0; osc < 3; ++osc) {
                 if (oscLevel_[osc] <= 0.0f || oscEnabled_[osc] < 0.5f) continue;
-                voiceSample += sampleWave(v.phase[osc], oscPosition_[osc], oscWave_[osc]) * oscLevel_[osc];
+                if (granularMode_[osc] >= 0.5f) {
+                    v.grainClock += grainDensity_ / sampleRate_;
+                    if (v.grainClock >= 1.0) {
+                        v.grainClock -= 1.0;
+                        for (auto& g : v.grains) if (!g.active) {
+                            v.rng = v.rng*1664525u + 1013904223u;
+                            const float rnd = static_cast<float>((v.rng >> 8) & 0xffffffu) / 16777216.0f;
+                            const double start = std::max(0.0,std::min(1.0,static_cast<double>(grainPosition_ + (rnd-.5f)*grainSpray_)));
+                            g.phase = start * kTableSize;
+                            g.step = std::pow(2.0, grainPitch_ / 12.0) * ((rnd < grainReverse_) ? -1.0 : 1.0);
+                            g.age = 0; g.length = std::max(8,static_cast<int>(grainSize_ * sampleRate_ / 1000.0)); g.active = true;
+                            break;
+                        }
+                    }
+                    float grains = 0.0f; int active = 0;
+                    for (auto& g : v.grains) if (g.active) {
+                        const int idx = (static_cast<int>(std::floor(g.phase)) % kTableSize + kTableSize) % kTableSize;
+                        const float window = 0.5f - 0.5f*std::cos(static_cast<float>(2*pi*g.age / g.length));
+                        grains += grainSource_[idx] * window;
+                        ++active; g.phase += g.step; if (++g.age >= g.length) g.active = false;
+                    }
+                    const float dry = sampleWave(v.phase[osc], oscPosition_[osc], oscWave_[osc]);
+                    voiceSample += (dry*(1.0f-grainMix_) + (active ? grains / std::sqrt(static_cast<float>(active)) : 0.0f)*grainMix_) * oscLevel_[osc];
+                } else voiceSample += sampleWave(v.phase[osc], oscPosition_[osc], oscWave_[osc]) * oscLevel_[osc];
                 v.phase[osc] += v.phaseStep * vibrato * std::pow(2.0, oscTune_[osc] / 12.0);
                 if (v.phase[osc] >= 1.0) v.phase[osc] -= std::floor(v.phase[osc]);
             }
