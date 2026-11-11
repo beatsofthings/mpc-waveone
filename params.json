@@ -2067,6 +2067,90 @@
         "USER WAV"
       ],
       "default": 0
+    },
+    {
+      "key": "osc1_va_mix",
+      "name": "OSC 1 VCO Mix",
+      "min": 0,
+      "max": 1,
+      "default": 0.45
+    },
+    {
+      "key": "osc1_va_sub",
+      "name": "OSC 1 Sub",
+      "min": 0,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "osc1_va_pwm_rate",
+      "name": "OSC 1 PWM Rate",
+      "min": 0.01,
+      "max": 20,
+      "default": 0.5
+    },
+    {
+      "key": "osc1_va_pwm_depth",
+      "name": "OSC 1 PWM Depth",
+      "min": 0,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "osc2_va_mix",
+      "name": "OSC 2 VCO Mix",
+      "min": 0,
+      "max": 1,
+      "default": 0.45
+    },
+    {
+      "key": "osc2_va_sub",
+      "name": "OSC 2 Sub",
+      "min": 0,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "osc2_va_pwm_rate",
+      "name": "OSC 2 PWM Rate",
+      "min": 0.01,
+      "max": 20,
+      "default": 0.5
+    },
+    {
+      "key": "osc2_va_pwm_depth",
+      "name": "OSC 2 PWM Depth",
+      "min": 0,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "osc3_va_mix",
+      "name": "OSC 3 VCO Mix",
+      "min": 0,
+      "max": 1,
+      "default": 0.45
+    },
+    {
+      "key": "osc3_va_sub",
+      "name": "OSC 3 Sub",
+      "min": 0,
+      "max": 1,
+      "default": 0
+    },
+    {
+      "key": "osc3_va_pwm_rate",
+      "name": "OSC 3 PWM Rate",
+      "min": 0.01,
+      "max": 20,
+      "default": 0.5
+    },
+    {
+      "key": "osc3_va_pwm_depth",
+      "name": "OSC 3 PWM Depth",
+      "min": 0,
+      "max": 1,
+      "default": 0
     }
   ]
 }
