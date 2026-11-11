@@ -17,8 +17,8 @@ struct Instance {
     waveone::Synth synth;
     float position = 0.0f, attack = 0.01f, decay = 0.12f;
     float sustain = 0.7f, release = 0.25f, gain = 0.2f;
-    float osc2_position = 0.0f, osc2_level = 0.0f, osc2_tune = 0.0f;
-    float osc3_position = 0.0f, osc3_level = 0.0f, osc3_tune = 0.0f;
+    float osc2_position = 0.0f, osc2_level = 0.7f, osc2_tune = 0.0f;
+    float osc3_position = 0.0f, osc3_level = 0.7f, osc3_tune = 0.0f;
     float osc1_on = 1.0f, osc2_on = 0.0f, osc3_on = 0.0f;
     float osc1_wave = 0.0f, osc2_wave = 0.0f, osc3_wave = 0.0f;
     float sub_level = 0.0f, cutoff = 18000.0f, resonance = 0.0f;
