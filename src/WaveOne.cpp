@@ -104,6 +104,12 @@ void Synth::setVaDetune(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && 
 void Synth::setFmRatio(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) fmRatio_[osc] = std::max(0.25f,std::min(x,16.0f)); }
 void Synth::setFmIndex(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) fmIndex_[osc] = std::max(0.0f,std::min(x,12.0f)); }
 void Synth::setGranularMode(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) granularMode_[osc] = x >= 0.5f ? 1.0f : 0.0f; }
+void Synth::setGrainParameter(int osc, int parameter, float x) noexcept {
+    if (osc<0 || osc>=3 || parameter<0 || parameter>=7 || !std::isfinite(x)) return;
+    const float lo[7]={5,1,0,0,-24,0,0};
+    const float hi[7]={500,80,1,1,24,1,1};
+    grainParams_[osc][parameter]=std::max(lo[parameter],std::min(hi[parameter],x));
+}
 void Synth::setGrainSize(float x) noexcept { if (std::isfinite(x)) grainSize_ = std::max(5.0f,std::min(x,500.0f)); }
 void Synth::setGrainDensity(float x) noexcept { if (std::isfinite(x)) grainDensity_ = std::max(1.0f,std::min(x,80.0f)); }
 void Synth::setGrainPosition(float x) noexcept { if (std::isfinite(x)) grainPosition_ = clamp01(x); }
@@ -197,16 +203,16 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
                     v.fmPhase[osc] += v.phaseStep*vibrato*fmRatio_[osc];
                     if (v.fmPhase[osc] >= 1.0) v.fmPhase[osc] -= std::floor(v.fmPhase[osc]);
                 } else if (engineType_[osc] == 1 || granularMode_[osc] >= 0.5f) {
-                    v.grainClock[osc] += std::max(1.0f,grainDensity_ * std::pow(2.0f,matrixGrain[osc]*3.0f)) / sampleRate_;
+                    v.grainClock[osc] += std::max(1.0f,grainParams_[osc][1] * std::pow(2.0f,matrixGrain[osc]*3.0f)) / sampleRate_;
                     if (v.grainClock[osc] >= 1.0) {
                         v.grainClock[osc] -= 1.0;
                         for (auto& g : v.grains[osc]) if (!g.active) {
                             v.rng = v.rng*1664525u + 1013904223u;
                             const float rnd = static_cast<float>((v.rng >> 8) & 0xffffffu) / 16777216.0f;
-                            const double start = std::max(0.0,std::min(1.0,static_cast<double>(grainPosition_ + (rnd-.5f)*grainSpray_)));
+                            const double start = std::max(0.0,std::min(1.0,static_cast<double>(grainParams_[osc][2] + (rnd-.5f)*grainParams_[osc][3])));
                             g.phase = start * kTableSize;
-                            g.step = std::pow(2.0, grainPitch_ / 12.0) * ((rnd < grainReverse_) ? -1.0 : 1.0);
-                            g.age = 0; g.length = std::max(8,static_cast<int>(grainSize_ * sampleRate_ / 1000.0)); g.active = true;
+                            g.step = std::pow(2.0, grainParams_[osc][4] / 12.0) * ((rnd < grainParams_[osc][5]) ? -1.0 : 1.0);
+                            g.age = 0; g.length = std::max(8,static_cast<int>(grainParams_[osc][0] * sampleRate_ / 1000.0)); g.active = true;
                             break;
                         }
                     }
@@ -218,7 +224,7 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
                         ++active; g.phase += g.step; if (++g.age >= g.length) g.active = false;
                     }
                     const float dry = sampleWave(v.phase[osc], std::max(0.0f,std::min(2.0f,oscPosition_[osc]+matrixWt[osc]*2.0f)), oscWave_[osc]);
-                    voiceSample += (dry*(1.0f-grainMix_) + (active ? grains / std::sqrt(static_cast<float>(active)) : 0.0f)*grainMix_) * oscLevel_[osc];
+                    voiceSample += (dry*(1.0f-grainParams_[osc][6]) + (active ? grains / std::sqrt(static_cast<float>(active)) : 0.0f)*grainParams_[osc][6]) * oscLevel_[osc];
                 } else voiceSample += sampleWave(v.phase[osc], std::max(0.0f,std::min(2.0f,oscPosition_[osc]+matrixWt[osc]*2.0f)), oscWave_[osc]) * oscLevel_[osc];
                 v.phase[osc] += v.phaseStep * vibrato * std::pow(2.0, (oscTune_[osc]+matrixPitch*12.0f) / 12.0);
                 if (v.phase[osc] >= 1.0) v.phase[osc] -= std::floor(v.phase[osc]);
