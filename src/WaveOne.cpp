@@ -44,6 +44,7 @@ void Synth::noteOff(int midiNote) noexcept {
     for (auto& v : voices_) if (v.note == midiNote && v.stage != Voice::Off && v.stage != Voice::Release) {
         v.stage = Voice::Release;
         v.releaseStep = v.env / std::max(1.0f, release_ * static_cast<float>(sampleRate_));
+        v.filterReleaseStep = v.filterEnv / std::max(1.0f, filterEnvRelease_ * static_cast<float>(sampleRate_));
     }
 }
 void Synth::allNotesOff() noexcept { for (auto& v : voices_) v = {}; }
@@ -63,6 +64,14 @@ void Synth::setFilterResonance(float x) noexcept { if (std::isfinite(x)) resonan
 void Synth::setLfoRate(float x) noexcept { if (std::isfinite(x)) lfoRate_ = std::max(0.01f, std::min(x, 20.0f)); }
 void Synth::setLfoDepth(float x) noexcept { if (std::isfinite(x)) lfoDepth_ = std::max(0.0f, std::min(x, 12.0f)); }
 void Synth::setOscWave(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) oscWave_[osc] = std::max(0, std::min(static_cast<int>(std::lround(x)), 6)); }
+void Synth::setLfo2Rate(float x) noexcept { if (std::isfinite(x)) lfo2Rate_ = std::max(0.01f, std::min(x, 20.0f)); }
+void Synth::setLfo2Depth(float x) noexcept { if (std::isfinite(x)) lfo2Depth_ = clamp01(x); }
+void Synth::setLfo2Target(float x) noexcept { if (std::isfinite(x)) lfo2Target_ = std::max(0, std::min(static_cast<int>(std::lround(x)), 2)); }
+void Synth::setFilterEnvAmount(float x) noexcept { if (std::isfinite(x)) filterEnvAmount_ = std::max(-1.0f, std::min(x, 1.0f)); }
+void Synth::setFilterEnvAttack(float x) noexcept { if (std::isfinite(x)) filterEnvAttack_ = std::max(0.001f, std::min(x, 10.0f)); }
+void Synth::setFilterEnvDecay(float x) noexcept { if (std::isfinite(x)) filterEnvDecay_ = std::max(0.001f, std::min(x, 10.0f)); }
+void Synth::setFilterEnvSustain(float x) noexcept { if (std::isfinite(x)) filterEnvSustain_ = clamp01(x); }
+void Synth::setFilterEnvRelease(float x) noexcept { if (std::isfinite(x)) filterEnvRelease_ = std::max(0.001f, std::min(x, 10.0f)); }
 float Synth::sampleWave(double phase, float position, int wave) const noexcept {
     const double wrapped = phase - std::floor(phase);
     const double idx = wrapped * kTableSize;
@@ -82,6 +91,9 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
         const double vibrato = std::pow(2.0, std::sin(lfoPhase_ * 2.0 * pi) * lfoDepth_ / 12.0);
         lfoPhase_ += lfoRate_ / sampleRate_;
         if (lfoPhase_ >= 1.0) lfoPhase_ -= std::floor(lfoPhase_);
+        const float lfo2 = static_cast<float>(std::sin(lfo2Phase_ * 2.0 * pi)) * lfo2Depth_;
+        lfo2Phase_ += lfo2Rate_ / sampleRate_;
+        if (lfo2Phase_ >= 1.0) lfo2Phase_ -= std::floor(lfo2Phase_);
         for (auto& v : voices_) {
             if (v.stage == Voice::Off) continue;
             switch (v.stage) {
@@ -110,10 +122,17 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
             v.subPhase += v.phaseStep * 0.5 * vibrato;
             if (v.subPhase >= 1.0) v.subPhase -= std::floor(v.subPhase);
             voiceSample += subLevel_ * std::sin(2.0 * pi * v.subPhase);
+            if (lfo2Target_ == 2) voiceSample *= std::max(0.0f, 1.0f + lfo2);
             // Stable one-pole low-pass; resonance controls a mild pre-filter drive.
             const float drive = 1.0f + 2.0f * resonance_;
             const float input = std::tanh(voiceSample * drive) / drive;
-            const float alpha = static_cast<float>(1.0 - std::exp(-2.0 * pi * cutoff_ / sampleRate_));
+            // Filter envelope follows the amp voice lifecycle, with separate ADSR times.
+            if (v.stage == Voice::Attack) v.filterEnv = std::min(1.0f, v.filterEnv + 1.0f / std::max(1.0f, filterEnvAttack_ * static_cast<float>(sampleRate_)));
+            else if (v.stage == Voice::Decay || v.stage == Voice::Sustain) v.filterEnv += (filterEnvSustain_ - v.filterEnv) / std::max(1.0f, filterEnvDecay_ * static_cast<float>(sampleRate_));
+            else if (v.stage == Voice::Release) v.filterEnv = std::max(0.0f, v.filterEnv - v.filterReleaseStep);
+            const float mod = filterEnvAmount_ * v.filterEnv + (lfo2Target_ == 1 ? lfo2 : 0.0f);
+            const float effectiveCutoff = std::max(30.0f, std::min(18000.0f, cutoff_ * std::pow(2.0f, 5.0f * mod)));
+            const float alpha = static_cast<float>(1.0 - std::exp(-2.0 * pi * effectiveCutoff / sampleRate_));
             v.filterState += alpha * (input - v.filterState);
             mixed += v.filterState * v.env * v.velocity;
         }
