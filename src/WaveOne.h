@@ -50,6 +50,9 @@ public:
     void setMatrixAmount(int slot, float value) noexcept;
     void setVaWaveform(int osc, float shape) noexcept;
     void setVaNoise(int osc, float level) noexcept;
+    void setFmAlgorithm(int osc, float algorithm) noexcept;
+    void setFmOperatorRatio(int osc, int op, float ratio) noexcept;
+    void setFmOperatorLevel(int osc, int op, float level) noexcept;
     void setFmFeedback(int osc, float amount) noexcept;
     void setGrainWindow(int osc, float window) noexcept;
     void setVaPulseWidth(int osc, float width) noexcept;
@@ -72,7 +75,7 @@ public:
     void render(float* left, float* right, std::size_t frames) noexcept;
 private:
     struct Grain { double phase = 0.0, step = 0.0; int age = 0, length = 0; bool active = false; };
-    struct Voice { std::array<std::array<Grain,8>,3> grains{}; std::array<double,3> grainClock{{0,0,0}}; std::uint32_t rng = 0x12345678u; int note = -1; std::array<double,3> phase{{0.0,0.0,0.0}}; double phaseStep = 0.0; double subPhase = 0.0; std::array<double,3> vaPhase{{0,0,0}}; std::array<double,3> fmPhase{{0,0,0}}; std::array<float,3> fmLast{{0,0,0}}; float filterState = 0.0f; float filterIc1 = 0.0f, filterIc2 = 0.0f; float filterEnv = 0.0f; float filterReleaseStep = 0.0f; float env = 0.0f; float velocity = 0.0f; std::uint64_t started = 0; enum Stage { Off, Attack, Decay, Sustain, Release } stage = Off; float releaseStep = 0.0f; };
+    struct Voice { std::array<std::array<Grain,8>,3> grains{}; std::array<double,3> grainClock{{0,0,0}}; std::uint32_t rng = 0x12345678u; int note = -1; std::array<double,3> phase{{0.0,0.0,0.0}}; double phaseStep = 0.0; double subPhase = 0.0; std::array<double,3> vaPhase{{0,0,0}}; std::array<std::array<double,6>,3> fmOpPhase{}; std::array<float,3> fmLast{{0,0,0}}; float filterState = 0.0f; float filterIc1 = 0.0f, filterIc2 = 0.0f; float filterEnv = 0.0f; float filterReleaseStep = 0.0f; float env = 0.0f; float velocity = 0.0f; std::uint64_t started = 0; enum Stage { Off, Attack, Decay, Sustain, Release } stage = Off; float releaseStep = 0.0f; };
     std::array<Voice, kVoices> voices_{};
     std::array<std::array<float, kTableSize>, 6> tables_{};
     double sampleRate_ = 48000.0;
@@ -93,6 +96,9 @@ private:
     std::array<float,3> vaNoise_{{0,0,0}}, fmFeedback_{{0,0,0}};
     std::array<float,3> vaPulseWidth_{{0.5f,0.5f,0.5f}};
     std::array<float,3> vaDetune_{{0.08f,0.08f,0.08f}};
+    std::array<int,3> fmAlgorithm_{{0,0,0}};
+    std::array<std::array<float,6>,3> fmOpRatio_{{{{1,2,3,4,5,6}},{{1,2,3,4,5,6}},{{1,2,3,4,5,6}}}};
+    std::array<std::array<float,6>,3> fmOpLevel_{{{{1,0.7f,0.4f,0.2f,0.1f,0.1f}},{{1,0.7f,0.4f,0.2f,0.1f,0.1f}},{{1,0.7f,0.4f,0.2f,0.1f,0.1f}}}};
     std::array<float,3> fmRatio_{{2.0f,2.0f,2.0f}};
     std::array<float,3> fmIndex_{{1.0f,1.0f,1.0f}};
     std::array<float,kTableSize> grainSource_{};
