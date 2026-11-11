@@ -36,6 +36,7 @@ struct Instance {
     float va_detune[3] = {0.08f,0.08f,0.08f};
     float fm_ratio[3] = {2,2,2};
     float fm_index[3] = {1,1,1};
+    float grain_per_osc[3][7] = {{100,12,0.5f,0,0,0,1},{100,12,0.5f,0,0,0,1},{100,12,0.5f,0,0,0,1}};
     float grain_size = 100.0f, grain_density = 12.0f, grain_position = 0.5f;
     float grain_spray = 0.0f, grain_pitch = 0.0f, grain_reverse = 0.0f, grain_mix = 1.0f;
     Instance() { synth.prepare(44100.0); }
@@ -108,6 +109,7 @@ float* param(Instance& i, const char* key) {
     if (!std::strcmp(key,"osc1_mode")) return &i.osc1_mode;
     if (!std::strcmp(key,"osc2_mode")) return &i.osc2_mode;
     if (!std::strcmp(key,"osc3_mode")) return &i.osc3_mode;
+    for(int osc=0;osc<3;++osc) for(int k=0;k<7;++k) { char name[32]; const char* keys[7]={"size","density","position","spray","pitch","reverse","mix"}; std::snprintf(name,sizeof(name),"osc%d_grain_%s",osc+1,keys[k]); if(!std::strcmp(key,name)) return &i.grain_per_osc[osc][k]; }
     if (!std::strcmp(key,"grain_size")) return &i.grain_size;
     if (!std::strcmp(key,"grain_density")) return &i.grain_density;
     if (!std::strcmp(key,"grain_position")) return &i.grain_position;
@@ -178,6 +180,7 @@ void set_param(void* p, const char* key, const char* val) {
     i.synth.setGranularMode(0,i.osc1_mode);
     i.synth.setGranularMode(1,i.osc2_mode);
     i.synth.setGranularMode(2,i.osc3_mode);
+    for(int osc=0;osc<3;++osc) for(int k=0;k<7;++k) i.synth.setGrainParameter(osc,k,i.grain_per_osc[osc][k]);
     i.synth.setGrainSize(i.grain_size);
     i.synth.setGrainDensity(i.grain_density);
     i.synth.setGrainPosition(i.grain_position);
