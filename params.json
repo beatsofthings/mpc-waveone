@@ -2005,6 +2005,38 @@
       "min": 0,
       "max": 1,
       "default": 0.1
+    },
+    {
+      "key": "factory_preset",
+      "name": "Factory Preset",
+      "options": [
+        "INIT",
+        "JUNO STYLE BRASS",
+        "FM GLASS",
+        "GRANULAR CLOUD",
+        "WARP BASS",
+        "ANALOG FM STACK",
+        "WT GRANULAR PAD",
+        "HYBRID KEYS",
+        "TRIPLE HYBRID"
+      ],
+      "default": 0
+    },
+    {
+      "key": "lfo4_edit_enable",
+      "name": "LFO4 MIDI Edit",
+      "options": [
+        "OFF",
+        "ON"
+      ],
+      "default": 0
+    },
+    {
+      "key": "lfo4_selected_step",
+      "name": "LFO4 Selected Step",
+      "min": 0,
+      "max": 15,
+      "default": 0
     }
   ]
 }
