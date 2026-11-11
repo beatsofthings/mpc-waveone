@@ -32,7 +32,7 @@ jobs:
             --so build/aarch64/waveone.so \
             --skin 'build/skin/Beats of Things - VST - WaveOne' \
             --entry build/pluginlist-entry.xml \
-            --version 0.6.0 \
+            --version 0.7.0 \
             --about 'Experimental eight-voice wavetable synthesizer for MPC Live III.' \
             --repo beatsofthings/mpc-waveone \
             --license MIT \
