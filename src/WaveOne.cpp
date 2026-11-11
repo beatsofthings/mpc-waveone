@@ -197,10 +197,10 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
                     v.fmPhase[osc] += v.phaseStep*vibrato*fmRatio_[osc];
                     if (v.fmPhase[osc] >= 1.0) v.fmPhase[osc] -= std::floor(v.fmPhase[osc]);
                 } else if (engineType_[osc] == 1 || granularMode_[osc] >= 0.5f) {
-                    v.grainClock += std::max(1.0f,grainDensity_ * std::pow(2.0f,matrixGrain[osc]*3.0f)) / sampleRate_;
-                    if (v.grainClock >= 1.0) {
-                        v.grainClock -= 1.0;
-                        for (auto& g : v.grains) if (!g.active) {
+                    v.grainClock[osc] += std::max(1.0f,grainDensity_ * std::pow(2.0f,matrixGrain[osc]*3.0f)) / sampleRate_;
+                    if (v.grainClock[osc] >= 1.0) {
+                        v.grainClock[osc] -= 1.0;
+                        for (auto& g : v.grains[osc]) if (!g.active) {
                             v.rng = v.rng*1664525u + 1013904223u;
                             const float rnd = static_cast<float>((v.rng >> 8) & 0xffffffu) / 16777216.0f;
                             const double start = std::max(0.0,std::min(1.0,static_cast<double>(grainPosition_ + (rnd-.5f)*grainSpray_)));
@@ -211,7 +211,7 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
                         }
                     }
                     float grains = 0.0f; int active = 0;
-                    for (auto& g : v.grains) if (g.active) {
+                    for (auto& g : v.grains[osc]) if (g.active) {
                         const int idx = (static_cast<int>(std::floor(g.phase)) % kTableSize + kTableSize) % kTableSize;
                         const float window = 0.5f - 0.5f*std::cos(static_cast<float>(2*pi*g.age / g.length));
                         grains += grainSource_[idx] * window;
@@ -219,7 +219,7 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
                     }
                     const float dry = sampleWave(v.phase[osc], std::max(0.0f,std::min(2.0f,oscPosition_[osc]+matrixWt[osc]*2.0f)), oscWave_[osc]);
                     voiceSample += (dry*(1.0f-grainMix_) + (active ? grains / std::sqrt(static_cast<float>(active)) : 0.0f)*grainMix_) * oscLevel_[osc];
-                } else voiceSample += sampleWave(v.phase[osc], oscPosition_[osc], oscWave_[osc]) * oscLevel_[osc];
+                } else voiceSample += sampleWave(v.phase[osc], std::max(0.0f,std::min(2.0f,oscPosition_[osc]+matrixWt[osc]*2.0f)), oscWave_[osc]) * oscLevel_[osc];
                 v.phase[osc] += v.phaseStep * vibrato * std::pow(2.0, (oscTune_[osc]+matrixPitch*12.0f) / 12.0);
                 if (v.phase[osc] >= 1.0) v.phase[osc] -= std::floor(v.phase[osc]);
             }
