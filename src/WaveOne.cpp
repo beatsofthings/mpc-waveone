@@ -96,7 +96,7 @@ void Synth::setFilterEnvDecay(float x) noexcept { if (std::isfinite(x)) filterEn
 void Synth::setFilterEnvSustain(float x) noexcept { if (std::isfinite(x)) filterEnvSustain_ = clamp01(x); }
 void Synth::setFilterEnvRelease(float x) noexcept { if (std::isfinite(x)) filterEnvRelease_ = std::max(0.001f, std::min(x, 10.0f)); }
 void Synth::setMatrixSource(int slot, float x) noexcept { if(slot>=0 && slot<16 && std::isfinite(x)) matrixSource_[slot]=std::max(0,std::min(6,static_cast<int>(std::lround(x)))); }
-void Synth::setMatrixDestination(int slot, float x) noexcept { if(slot>=0 && slot<16 && std::isfinite(x)) matrixDestination_[slot]=std::max(0,std::min(3,static_cast<int>(std::lround(x)))); }
+void Synth::setMatrixDestination(int slot, float x) noexcept { if(slot>=0 && slot<16 && std::isfinite(x)) matrixDestination_[slot]=std::max(0,std::min(15,static_cast<int>(std::lround(x)))); }
 void Synth::setMatrixAmount(int slot, float x) noexcept { if(slot>=0 && slot<16 && std::isfinite(x)) matrixAmount_[slot]=std::max(-1.0f,std::min(x,1.0f)); }
 void Synth::setEngineType(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) engineType_[osc] = std::max(0,std::min(3,static_cast<int>(std::lround(x)))); }
 void Synth::setVaPulseWidth(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) vaPulseWidth_[osc] = std::max(0.05f,std::min(x,0.95f)); }
@@ -146,6 +146,7 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
         for (auto& v : voices_) {
             if (v.stage == Voice::Off) continue;
             float matrixCutoff=0.0f, matrixPitch=0.0f, matrixLevel=0.0f;
+            float matrixWt[3]={0,0,0}, matrixFm[3]={0,0,0}, matrixVa[3]={0,0,0}, matrixGrain[3]={0,0,0};
             const float sources[7] = {0.0f,lfoValue(0,lfoPhase_),lfo2,lfo3,lfo4,v.velocity*2.0f-1.0f,(v.note-60.0f)/60.0f};
             for (int m=0;m<16;++m) {
                 const int src=matrixSource_[m],dst=matrixDestination_[m];
@@ -153,6 +154,10 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
                 if(dst==1) matrixCutoff+=mod;
                 else if(dst==2) matrixPitch+=mod;
                 else if(dst==3) matrixLevel+=mod;
+                else if(dst>=4 && dst<=6) matrixWt[dst-4]+=mod;
+                else if(dst>=7 && dst<=9) matrixFm[dst-7]+=mod;
+                else if(dst>=10 && dst<=12) matrixVa[dst-10]+=mod;
+                else if(dst>=13 && dst<=15) matrixGrain[dst-13]+=mod;
             }
             matrixCutoff=std::max(-2.0f,std::min(matrixCutoff,2.0f));
             matrixPitch=std::max(-2.0f,std::min(matrixPitch,2.0f));
@@ -181,18 +186,18 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
                     const double a = v.vaPhase[osc];
                     const double b = v.phase[osc];
                     const float saw = static_cast<float>(2.0*a-1.0);
-                    const float pulse = b < vaPulseWidth_[osc] ? 1.0f : -1.0f;
+                    const float pulse = b < std::max(0.05f,std::min(0.95f,vaPulseWidth_[osc]+matrixVa[osc]*0.45f)) ? 1.0f : -1.0f;
                     voiceSample += (0.55f*saw+0.45f*pulse)*oscLevel_[osc];
                     v.vaPhase[osc] += v.phaseStep*vibrato*std::pow(2.0,vaDetune_[osc]/12.0);
                     if (v.vaPhase[osc] >= 1.0) v.vaPhase[osc] -= std::floor(v.vaPhase[osc]);
                 } else if (engineType_[osc] == 3) {
                     // Two-operator FM prototype; full DX7 six-operator engine is pending.
                     const double mod = std::sin(2.0*pi*v.fmPhase[osc]);
-                    voiceSample += static_cast<float>(std::sin(2.0*pi*v.phase[osc]+fmIndex_[osc]*mod))*oscLevel_[osc];
+                    voiceSample += static_cast<float>(std::sin(2.0*pi*v.phase[osc]+std::max(0.0f,fmIndex_[osc]+matrixFm[osc]*8.0f)*mod))*oscLevel_[osc];
                     v.fmPhase[osc] += v.phaseStep*vibrato*fmRatio_[osc];
                     if (v.fmPhase[osc] >= 1.0) v.fmPhase[osc] -= std::floor(v.fmPhase[osc]);
                 } else if (engineType_[osc] == 1 || granularMode_[osc] >= 0.5f) {
-                    v.grainClock += grainDensity_ / sampleRate_;
+                    v.grainClock += std::max(1.0f,grainDensity_ * std::pow(2.0f,matrixGrain[osc]*3.0f)) / sampleRate_;
                     if (v.grainClock >= 1.0) {
                         v.grainClock -= 1.0;
                         for (auto& g : v.grains) if (!g.active) {
@@ -212,7 +217,7 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
                         grains += grainSource_[idx] * window;
                         ++active; g.phase += g.step; if (++g.age >= g.length) g.active = false;
                     }
-                    const float dry = sampleWave(v.phase[osc], oscPosition_[osc], oscWave_[osc]);
+                    const float dry = sampleWave(v.phase[osc], std::max(0.0f,std::min(2.0f,oscPosition_[osc]+matrixWt[osc]*2.0f)), oscWave_[osc]);
                     voiceSample += (dry*(1.0f-grainMix_) + (active ? grains / std::sqrt(static_cast<float>(active)) : 0.0f)*grainMix_) * oscLevel_[osc];
                 } else voiceSample += sampleWave(v.phase[osc], oscPosition_[osc], oscWave_[osc]) * oscLevel_[osc];
                 v.phase[osc] += v.phaseStep * vibrato * std::pow(2.0, (oscTune_[osc]+matrixPitch*12.0f) / 12.0);
