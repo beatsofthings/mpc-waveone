@@ -67,7 +67,7 @@ private:
     std::array<std::array<float, kTableSize>, 6> tables_{};
     double sampleRate_ = 48000.0;
     std::array<float,3> oscPosition_{{0.0f,0.0f,0.0f}};
-    std::array<float,3> oscLevel_{{1.0f,0.0f,0.0f}};
+    std::array<float,3> oscLevel_{{1.0f,0.7f,0.7f}};
     std::array<float,3> oscTune_{{0.0f,0.0f,0.0f}};
     std::array<float,3> oscEnabled_{{1.0f,0.0f,0.0f}};
     std::array<int,3> oscWave_{{0,0,0}};
