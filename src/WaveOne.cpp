@@ -79,6 +79,11 @@ void Synth::setFilterEnvAttack(float x) noexcept { if (std::isfinite(x)) filterE
 void Synth::setFilterEnvDecay(float x) noexcept { if (std::isfinite(x)) filterEnvDecay_ = std::max(0.001f, std::min(x, 10.0f)); }
 void Synth::setFilterEnvSustain(float x) noexcept { if (std::isfinite(x)) filterEnvSustain_ = clamp01(x); }
 void Synth::setFilterEnvRelease(float x) noexcept { if (std::isfinite(x)) filterEnvRelease_ = std::max(0.001f, std::min(x, 10.0f)); }
+void Synth::setEngineType(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) engineType_[osc] = std::max(0,std::min(3,static_cast<int>(std::lround(x)))); }
+void Synth::setVaPulseWidth(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) vaPulseWidth_[osc] = std::max(0.05f,std::min(x,0.95f)); }
+void Synth::setVaDetune(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) vaDetune_[osc] = std::max(0.0f,std::min(x,1.0f)); }
+void Synth::setFmRatio(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) fmRatio_[osc] = std::max(0.25f,std::min(x,16.0f)); }
+void Synth::setFmIndex(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) fmIndex_[osc] = std::max(0.0f,std::min(x,12.0f)); }
 void Synth::setGranularMode(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) granularMode_[osc] = x >= 0.5f ? 1.0f : 0.0f; }
 void Synth::setGrainSize(float x) noexcept { if (std::isfinite(x)) grainSize_ = std::max(5.0f,std::min(x,500.0f)); }
 void Synth::setGrainDensity(float x) noexcept { if (std::isfinite(x)) grainDensity_ = std::max(1.0f,std::min(x,80.0f)); }
@@ -140,7 +145,22 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
             float voiceSample = 0.0f;
             for (int osc = 0; osc < 3; ++osc) {
                 if (oscLevel_[osc] <= 0.0f || oscEnabled_[osc] < 0.5f) continue;
-                if (granularMode_[osc] >= 0.5f) {
+                if (engineType_[osc] == 2) {
+                    // Two detuned virtual-analog oscillators: saw + variable pulse.
+                    const double a = v.vaPhase[osc];
+                    const double b = v.phase[osc];
+                    const float saw = static_cast<float>(2.0*a-1.0);
+                    const float pulse = b < vaPulseWidth_[osc] ? 1.0f : -1.0f;
+                    voiceSample += (0.55f*saw+0.45f*pulse)*oscLevel_[osc];
+                    v.vaPhase[osc] += v.phaseStep*vibrato*std::pow(2.0,vaDetune_[osc]/12.0);
+                    if (v.vaPhase[osc] >= 1.0) v.vaPhase[osc] -= std::floor(v.vaPhase[osc]);
+                } else if (engineType_[osc] == 3) {
+                    // Two-operator FM prototype; full DX7 six-operator engine is pending.
+                    const double mod = std::sin(2.0*pi*v.fmPhase[osc]);
+                    voiceSample += static_cast<float>(std::sin(2.0*pi*v.phase[osc]+fmIndex_[osc]*mod))*oscLevel_[osc];
+                    v.fmPhase[osc] += v.phaseStep*vibrato*fmRatio_[osc];
+                    if (v.fmPhase[osc] >= 1.0) v.fmPhase[osc] -= std::floor(v.fmPhase[osc]);
+                } else if (engineType_[osc] == 1 || granularMode_[osc] >= 0.5f) {
                     v.grainClock += grainDensity_ / sampleRate_;
                     if (v.grainClock >= 1.0) {
                         v.grainClock -= 1.0;
