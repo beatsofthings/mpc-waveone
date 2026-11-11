@@ -21,5 +21,6 @@
       "-lm"
     ]
   },
-  "layout": "layout.conf"
+  "layout": "layout.conf",
+  "art": "html"
 }
