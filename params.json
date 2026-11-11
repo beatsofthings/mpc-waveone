@@ -1,0 +1,50 @@
+{
+  "name": "WaveOne",
+  "params": [
+    {
+      "key": "position",
+      "name": "Wavetable",
+      "min": 0,
+      "max": 2,
+      "default": 0
+    },
+    {
+      "key": "attack",
+      "name": "Attack",
+      "min": 0.001,
+      "max": 10,
+      "default": 0.01,
+      "unit": "s"
+    },
+    {
+      "key": "decay",
+      "name": "Decay",
+      "min": 0.001,
+      "max": 10,
+      "default": 0.12,
+      "unit": "s"
+    },
+    {
+      "key": "sustain",
+      "name": "Sustain",
+      "min": 0,
+      "max": 1,
+      "default": 0.7
+    },
+    {
+      "key": "release",
+      "name": "Release",
+      "min": 0.001,
+      "max": 10,
+      "default": 0.25,
+      "unit": "s"
+    },
+    {
+      "key": "gain",
+      "name": "Gain",
+      "min": 0,
+      "max": 1,
+      "default": 0.2
+    }
+  ]
+}
