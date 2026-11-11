@@ -22,6 +22,7 @@ struct Instance {
     float osc1_on = 1.0f, osc2_on = 0.0f, osc3_on = 0.0f;
     float osc1_wave = 0.0f, osc2_wave = 0.0f, osc3_wave = 0.0f;
     float sub_level = 0.0f, cutoff = 18000.0f, resonance = 0.0f;
+    float filter_mode = 0.0f, filter_q = 0.707f;
     float lfo1_rate = 2.0f, lfo1_depth = 0.0f;
     float lfo2_rate = 0.5f, lfo2_depth = 0.0f, lfo2_target = 0.0f;
     float lfo3_rate = 0.25f, lfo3_depth = 0.0f, lfo4_rate = 1.0f, lfo4_depth = 0.0f;
@@ -77,6 +78,8 @@ float* param(Instance& i, const char* key) {
     if (!std::strcmp(key,"osc2_on")) return &i.osc2_on;
     if (!std::strcmp(key,"osc3_on")) return &i.osc3_on;
     if (!std::strcmp(key,"sub_level")) return &i.sub_level;
+    if (!std::strcmp(key,"filter_mode")) return &i.filter_mode;
+    if (!std::strcmp(key,"filter_q")) return &i.filter_q;
     if (!std::strcmp(key,"cutoff")) return &i.cutoff;
     if (!std::strcmp(key,"resonance")) return &i.resonance;
     if (!std::strcmp(key,"lfo1_rate")) return &i.lfo1_rate;
@@ -152,6 +155,8 @@ void set_param(void* p, const char* key, const char* val) {
     i.synth.setOscWave(1,i.osc2_wave);
     i.synth.setOscWave(2,i.osc3_wave);
     i.synth.setSubLevel(i.sub_level);
+    i.synth.setFilterMode(i.filter_mode);
+    i.synth.setFilterQ(i.filter_q);
     i.synth.setFilterCutoff(i.cutoff);
     i.synth.setFilterResonance(i.resonance);
     i.synth.setLfoRate(i.lfo1_rate);
