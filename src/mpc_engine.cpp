@@ -24,6 +24,7 @@ struct Instance {
     float osc1_on = 1.0f, osc2_on = 0.0f, osc3_on = 0.0f;
     float osc1_wave = 0.0f, osc2_wave = 0.0f, osc3_wave = 0.0f;
     float wt_warp_mode[3]={0,0,0}, wt_warp_amount[3]={0,0,0}, va_sync[3]={0,0,0};
+    float grain_source_mode[3]={0,0,0};
     float sub_level = 0.0f, cutoff = 18000.0f, resonance = 0.0f;
     float filter_mode = 0.0f, filter_q = 0.707f;
     float lfo1_rate = 2.0f, lfo1_depth = 0.0f;
@@ -49,7 +50,19 @@ struct Instance {
     float grain_spray = 0.0f, grain_pitch = 0.0f, grain_reverse = 0.0f, grain_mix = 1.0f;
     Instance() { synth.prepare(44100.0); }
 };
-void* create(const char*) { return new (std::nothrow) Instance(); }
+void* create(const char* data_dir) {
+    Instance* i=new (std::nothrow) Instance(); if(!i)return nullptr;
+    if(data_dir && data_dir[0]) {
+        for(int n=0;n<3;++n) {
+            char path[1024];
+            const int a=std::snprintf(path,sizeof(path),"%s/user_wavetables/osc%d.wav",data_dir,n+1);
+            if(a>0 && a<static_cast<int>(sizeof(path))) i->synth.loadUserWave(n,path);
+            const int b=std::snprintf(path,sizeof(path),"%s/user_granular/osc%d.wav",data_dir,n+1);
+            if(b>0 && b<static_cast<int>(sizeof(path))) i->synth.loadUserGrain(n,path);
+        }
+    }
+    return i;
+}
 void destroy(void* p) { delete static_cast<Instance*>(p); }
 void midi(void* p, const uint8_t* msg, int len) {
     if (!p || !msg || len < 1) return;
@@ -125,6 +138,7 @@ float* param(Instance& i, const char* key) {
     }
     for (int n=0;n<3;++n) { char name[32];
         std::snprintf(name,sizeof(name),"osc%d_engine",n+1); if (!std::strcmp(key,name)) return &i.engine_type[n];
+        std::snprintf(name,sizeof(name),"osc%d_grain_source",n+1); if(!std::strcmp(key,name)) return &i.grain_source_mode[n];
         std::snprintf(name,sizeof(name),"osc%d_wt_warp_mode",n+1); if (!std::strcmp(key,name)) return &i.wt_warp_mode[n];
         std::snprintf(name,sizeof(name),"osc%d_wt_warp_amount",n+1); if (!std::strcmp(key,name)) return &i.wt_warp_amount[n];
         std::snprintf(name,sizeof(name),"osc%d_va_sync",n+1); if (!std::strcmp(key,name)) return &i.va_sync[n];
@@ -230,6 +244,7 @@ void set_param(void* p, const char* key, const char* val) {
     }
     for (int n=0;n<3;++n) {
         i.synth.setEngineType(n,i.engine_type[n]);
+        i.synth.setGrainSourceMode(n,i.grain_source_mode[n]);
         i.synth.setWtWarpMode(n,i.wt_warp_mode[n]);
         i.synth.setWtWarpAmount(n,i.wt_warp_amount[n]);
         i.synth.setVaSync(n,i.va_sync[n]);
