@@ -1104,6 +1104,57 @@
       "min": -1,
       "max": 1,
       "default": 0
+    },
+    {
+      "key": "lfo1_shape",
+      "name": "LFO 1 Shape",
+      "options": [
+        "SINE",
+        "TRIANGLE",
+        "RAMP UP",
+        "RAMP DOWN",
+        "SQUARE",
+        "PULSE",
+        "COMPLEX",
+        "HARMONIC",
+        "RECTIFIED",
+        "SOFT PULSE"
+      ],
+      "default": 0
+    },
+    {
+      "key": "lfo2_shape",
+      "name": "LFO 2 Shape",
+      "options": [
+        "SINE",
+        "TRIANGLE",
+        "RAMP UP",
+        "RAMP DOWN",
+        "SQUARE",
+        "PULSE",
+        "COMPLEX",
+        "HARMONIC",
+        "RECTIFIED",
+        "SOFT PULSE"
+      ],
+      "default": 0
+    },
+    {
+      "key": "lfo3_shape",
+      "name": "LFO 3 Shape",
+      "options": [
+        "SINE",
+        "TRIANGLE",
+        "RAMP UP",
+        "RAMP DOWN",
+        "SQUARE",
+        "PULSE",
+        "COMPLEX",
+        "HARMONIC",
+        "RECTIFIED",
+        "SOFT PULSE"
+      ],
+      "default": 0
     }
   ]
 }
