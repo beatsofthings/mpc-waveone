@@ -106,7 +106,7 @@
         "OFF",
         "ON"
       ],
-      "default": 1
+      "default": 0
     },
     {
       "key": "osc3_on",
@@ -115,7 +115,7 @@
         "OFF",
         "ON"
       ],
-      "default": 1
+      "default": 0
     },
     {
       "key": "sub_level",
@@ -154,6 +154,48 @@
       "max": 12,
       "default": 0,
       "unit": "st"
+    },
+    {
+      "key": "osc1_wave",
+      "name": "OSC 1 Factory",
+      "options": [
+        "MORPH",
+        "SINE",
+        "SAW",
+        "SQUARE",
+        "TRIANGLE",
+        "PULSE",
+        "ORGAN"
+      ],
+      "default": 0
+    },
+    {
+      "key": "osc2_wave",
+      "name": "OSC 2 Factory",
+      "options": [
+        "MORPH",
+        "SINE",
+        "SAW",
+        "SQUARE",
+        "TRIANGLE",
+        "PULSE",
+        "ORGAN"
+      ],
+      "default": 0
+    },
+    {
+      "key": "osc3_wave",
+      "name": "OSC 3 Factory",
+      "options": [
+        "MORPH",
+        "SINE",
+        "SAW",
+        "SQUARE",
+        "TRIANGLE",
+        "PULSE",
+        "ORGAN"
+      ],
+      "default": 0
     }
   ]
 }
