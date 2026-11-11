@@ -24,6 +24,7 @@ public:
     void setFilterResonance(float amount) noexcept;
     void setLfoRate(float hz) noexcept;
     void setLfoDepth(float semitones) noexcept;
+    void setLfoShape(int lfo, float shape) noexcept;
     void setLfo3Rate(float hz) noexcept;
     void setLfo3Depth(float amount) noexcept;
     void setLfo4Rate(float hz) noexcept;
@@ -85,6 +86,8 @@ private:
     float subLevel_ = 0.0f, cutoff_ = 18000.0f, resonance_ = 0.0f;
     float lfoRate_ = 2.0f, lfoDepth_ = 0.0f;
     double lfoPhase_ = 0.0, lfo2Phase_ = 0.0, lfo3Phase_ = 0.0, lfo4Phase_ = 0.0;
+    std::array<int,3> lfoShape_{{0,0,0}};
+    float lfoValue(int lfo, double phase) const noexcept;
     float lfo3Rate_ = 0.25f, lfo3Depth_ = 0.0f, lfo4Rate_ = 1.0f, lfo4Depth_ = 0.0f;
     std::array<float,16> lfo4Steps_{{0,0.38f,0.7f,0.92f,1,0.92f,0.7f,0.38f,0,-0.38f,-0.7f,-0.92f,-1,-0.92f,-0.7f,-0.38f}};
     float lfo2Rate_ = 0.5f, lfo2Depth_ = 0.0f;
