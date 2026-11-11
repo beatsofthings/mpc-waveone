@@ -38,6 +38,7 @@ struct Instance {
     float engine_type[3] = {0,0,0};
     float matrix_source[16] = {}, matrix_dest[16] = {}, matrix_amount[16] = {};
     float va_wave[3] = {0,0,0}, va_noise[3] = {0,0,0}, fm_feedback[3] = {0,0,0}, grain_window[3] = {0,0,0};
+    float va_mix[3]={.45f,.45f,.45f},va_sub[3]={0,0,0},va_pwm_rate[3]={.5f,.5f,.5f},va_pwm_depth[3]={0,0,0};
     float va_pw[3] = {0.5f,0.5f,0.5f};
     float va_detune[3] = {0.08f,0.08f,0.08f};
     float fm_algorithm[3]={0,0,0};
@@ -146,6 +147,10 @@ float* param(Instance& i, const char* key) {
         std::snprintf(name,sizeof(name),"osc%d_va_noise",n+1); if (!std::strcmp(key,name)) return &i.va_noise[n];
         std::snprintf(name,sizeof(name),"osc%d_fm_feedback",n+1); if (!std::strcmp(key,name)) return &i.fm_feedback[n];
         std::snprintf(name,sizeof(name),"osc%d_grain_window",n+1); if (!std::strcmp(key,name)) return &i.grain_window[n];
+        std::snprintf(name,sizeof(name),"osc%d_va_mix",n+1); if(!std::strcmp(key,name))return &i.va_mix[n];
+        std::snprintf(name,sizeof(name),"osc%d_va_sub",n+1); if(!std::strcmp(key,name))return &i.va_sub[n];
+        std::snprintf(name,sizeof(name),"osc%d_va_pwm_rate",n+1); if(!std::strcmp(key,name))return &i.va_pwm_rate[n];
+        std::snprintf(name,sizeof(name),"osc%d_va_pwm_depth",n+1); if(!std::strcmp(key,name))return &i.va_pwm_depth[n];
         std::snprintf(name,sizeof(name),"osc%d_va_pw",n+1); if (!std::strcmp(key,name)) return &i.va_pw[n];
         std::snprintf(name,sizeof(name),"osc%d_va_detune",n+1); if (!std::strcmp(key,name)) return &i.va_detune[n];
         std::snprintf(name,sizeof(name),"osc%d_fm_algorithm",n+1); if (!std::strcmp(key,name)) return &i.fm_algorithm[n];
@@ -248,6 +253,10 @@ void set_param(void* p, const char* key, const char* val) {
         i.synth.setWtWarpMode(n,i.wt_warp_mode[n]);
         i.synth.setWtWarpAmount(n,i.wt_warp_amount[n]);
         i.synth.setVaSync(n,i.va_sync[n]);
+        i.synth.setVaMix(n,i.va_mix[n]);
+        i.synth.setVaSub(n,i.va_sub[n]);
+        i.synth.setVaPwmRate(n,i.va_pwm_rate[n]);
+        i.synth.setVaPwmDepth(n,i.va_pwm_depth[n]);
         i.synth.setVaWaveform(n,i.va_wave[n]);
         i.synth.setVaNoise(n,i.va_noise[n]);
         i.synth.setFmFeedback(n,i.fm_feedback[n]);
