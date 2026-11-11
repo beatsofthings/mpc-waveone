@@ -30,6 +30,7 @@ struct Instance {
     float filter_env_sustain = 0.0f, filter_env_release = 0.2f;
     float osc1_mode = 0.0f, osc2_mode = 0.0f, osc3_mode = 0.0f;
     float engine_type[3] = {0,0,0};
+    float matrix_source[16] = {}, matrix_dest[16] = {}, matrix_amount[16] = {};
     float va_pw[3] = {0.5f,0.5f,0.5f};
     float va_detune[3] = {0.08f,0.08f,0.08f};
     float fm_ratio[3] = {2,2,2};
@@ -90,6 +91,11 @@ float* param(Instance& i, const char* key) {
     if (!std::strcmp(key,"filter_env_decay")) return &i.filter_env_decay;
     if (!std::strcmp(key,"filter_env_sustain")) return &i.filter_env_sustain;
     if (!std::strcmp(key,"filter_env_release")) return &i.filter_env_release;
+    for (int n=0;n<16;++n) { char name[32];
+        std::snprintf(name,sizeof(name),"matrix_%02d_source",n+1); if (!std::strcmp(key,name)) return &i.matrix_source[n];
+        std::snprintf(name,sizeof(name),"matrix_%02d_dest",n+1); if (!std::strcmp(key,name)) return &i.matrix_dest[n];
+        std::snprintf(name,sizeof(name),"matrix_%02d_amount",n+1); if (!std::strcmp(key,name)) return &i.matrix_amount[n];
+    }
     for (int n=0;n<3;++n) { char name[32];
         std::snprintf(name,sizeof(name),"osc%d_engine",n+1); if (!std::strcmp(key,name)) return &i.engine_type[n];
         std::snprintf(name,sizeof(name),"osc%d_va_pw",n+1); if (!std::strcmp(key,name)) return &i.va_pw[n];
@@ -154,6 +160,11 @@ void set_param(void* p, const char* key, const char* val) {
     i.synth.setFilterEnvDecay(i.filter_env_decay);
     i.synth.setFilterEnvSustain(i.filter_env_sustain);
     i.synth.setFilterEnvRelease(i.filter_env_release);
+    for (int n=0;n<16;++n) {
+        i.synth.setMatrixSource(n,i.matrix_source[n]);
+        i.synth.setMatrixDestination(n,i.matrix_dest[n]);
+        i.synth.setMatrixAmount(n,i.matrix_amount[n]);
+    }
     for (int n=0;n<3;++n) {
         i.synth.setEngineType(n,i.engine_type[n]);
         i.synth.setVaPulseWidth(n,i.va_pw[n]);
