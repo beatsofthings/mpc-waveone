@@ -37,6 +37,9 @@ struct Instance {
     float va_wave[3] = {0,0,0}, va_noise[3] = {0,0,0}, fm_feedback[3] = {0,0,0}, grain_window[3] = {0,0,0};
     float va_pw[3] = {0.5f,0.5f,0.5f};
     float va_detune[3] = {0.08f,0.08f,0.08f};
+    float fm_algorithm[3]={0,0,0};
+    float fm_op_ratio[3][6]={{1,2,3,4,5,6},{1,2,3,4,5,6},{1,2,3,4,5,6}};
+    float fm_op_level[3][6]={{1,.7f,.4f,.2f,.1f,.1f},{1,.7f,.4f,.2f,.1f,.1f},{1,.7f,.4f,.2f,.1f,.1f}};
     float fm_ratio[3] = {2,2,2};
     float fm_index[3] = {1,1,1};
     float grain_per_osc[3][7] = {{100,12,0.5f,0,0,0,1},{100,12,0.5f,0,0,0,1},{100,12,0.5f,0,0,0,1}};
@@ -115,6 +118,11 @@ float* param(Instance& i, const char* key) {
         std::snprintf(name,sizeof(name),"osc%d_grain_window",n+1); if (!std::strcmp(key,name)) return &i.grain_window[n];
         std::snprintf(name,sizeof(name),"osc%d_va_pw",n+1); if (!std::strcmp(key,name)) return &i.va_pw[n];
         std::snprintf(name,sizeof(name),"osc%d_va_detune",n+1); if (!std::strcmp(key,name)) return &i.va_detune[n];
+        std::snprintf(name,sizeof(name),"osc%d_fm_algorithm",n+1); if (!std::strcmp(key,name)) return &i.fm_algorithm[n];
+        for(int op=0;op<6;++op) {
+          std::snprintf(name,sizeof(name),"osc%d_fm_op%d_ratio",n+1,op+1); if (!std::strcmp(key,name)) return &i.fm_op_ratio[n][op];
+          std::snprintf(name,sizeof(name),"osc%d_fm_op%d_level",n+1,op+1); if (!std::strcmp(key,name)) return &i.fm_op_level[n][op];
+        }
         std::snprintf(name,sizeof(name),"osc%d_fm_ratio",n+1); if (!std::strcmp(key,name)) return &i.fm_ratio[n];
         std::snprintf(name,sizeof(name),"osc%d_fm_index",n+1); if (!std::strcmp(key,name)) return &i.fm_index[n];
     }
@@ -195,6 +203,8 @@ void set_param(void* p, const char* key, const char* val) {
         i.synth.setGrainWindow(n,i.grain_window[n]);
         i.synth.setVaPulseWidth(n,i.va_pw[n]);
         i.synth.setVaDetune(n,i.va_detune[n]);
+        i.synth.setFmAlgorithm(n,i.fm_algorithm[n]);
+        for(int op=0;op<6;++op) { i.synth.setFmOperatorRatio(n,op,i.fm_op_ratio[n][op]); i.synth.setFmOperatorLevel(n,op,i.fm_op_level[n][op]); }
         i.synth.setFmRatio(n,i.fm_ratio[n]);
         i.synth.setFmIndex(n,i.fm_index[n]);
     }
