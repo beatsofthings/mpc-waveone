@@ -19,6 +19,9 @@ public:
     void setOscTune(int osc, float semitones) noexcept;
     void setOscEnabled(int osc, float enabled) noexcept;
     void setOscWave(int osc, float wave) noexcept;
+    void setWtWarpMode(int osc, float mode) noexcept;
+    void setWtWarpAmount(int osc, float amount) noexcept;
+    void setVaSync(int osc, float enabled) noexcept;
     void setSubLevel(float level) noexcept;
     void setFilterMode(float mode) noexcept;
     void setFilterQ(float q) noexcept;
@@ -78,6 +81,9 @@ private:
     std::array<float,3> oscTune_{{0.0f,0.0f,0.0f}};
     std::array<float,3> oscEnabled_{{1.0f,0.0f,0.0f}};
     std::array<int,3> oscWave_{{0,0,0}};
+    std::array<int,3> wtWarpMode_{{0,0,0}};
+    std::array<float,3> wtWarpAmount_{{0,0,0}};
+    std::array<float,3> vaSync_{{0,0,0}};
     std::array<float,3> granularMode_{{0.0f,0.0f,0.0f}};
     std::array<int,3> engineType_{{0,0,0}};
     std::array<int,16> matrixSource_{};
@@ -109,5 +115,6 @@ private:
     float attack_ = 0.01f, decay_ = 0.12f, sustain_ = 0.7f, release_ = 0.25f, gain_ = 0.2f;
     std::uint64_t counter_ = 0;
     float sampleWave(double phase, float position, int wave) const noexcept;
+    float sampleOscWave(int osc, double phase, float position) const noexcept;
 };
 }
