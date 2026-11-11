@@ -2,7 +2,7 @@
   "name": "WaveOne",
   "vendor": "Beats of Things",
   "uid": "WvO1",
-  "version": 1700,
+  "version": 1800,
   "so": "waveone.so",
   "params": "params.json",
   "targets": [
