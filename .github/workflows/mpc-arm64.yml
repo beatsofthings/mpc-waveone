@@ -1,0 +1,28 @@
+name: MPC WaveOne ARM64 (experimental)
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout Open MPC toolchain
+        uses: actions/checkout@v4
+        with:
+          repository: open-mpc/mpc-vst-plugins
+          path: open-mpc
+      - name: Build Gen2 plugin
+        run: |
+          docker run --rm --privileged tonistiigi/binfmt --install arm64
+          bash open-mpc/tools/build_port.sh vst.json aarch64
+      - name: Upload experimental build outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: waveone-arm64-build
+          path: |
+            build/aarch64/
+            build/skin/
+            build/pluginlist-entry.xml
+          if-no-files-found: warn
