@@ -1614,6 +1614,25 @@
         "TRAPEZOID"
       ],
       "default": 0
+    },
+    {
+      "key": "filter_mode",
+      "name": "Filter Mode",
+      "options": [
+        "LOW PASS",
+        "BAND PASS",
+        "HIGH PASS",
+        "NOTCH",
+        "PEAK"
+      ],
+      "default": 0
+    },
+    {
+      "key": "filter_q",
+      "name": "Filter Resonance Q",
+      "min": 0.5,
+      "max": 12,
+      "default": 0.707
     }
   ]
 }
