@@ -99,6 +99,10 @@ void Synth::setMatrixSource(int slot, float x) noexcept { if(slot>=0 && slot<16 
 void Synth::setMatrixDestination(int slot, float x) noexcept { if(slot>=0 && slot<16 && std::isfinite(x)) matrixDestination_[slot]=std::max(0,std::min(15,static_cast<int>(std::lround(x)))); }
 void Synth::setMatrixAmount(int slot, float x) noexcept { if(slot>=0 && slot<16 && std::isfinite(x)) matrixAmount_[slot]=std::max(-1.0f,std::min(x,1.0f)); }
 void Synth::setEngineType(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) engineType_[osc] = std::max(0,std::min(3,static_cast<int>(std::lround(x)))); }
+void Synth::setVaWaveform(int osc, float x) noexcept { if(osc>=0&&osc<3&&std::isfinite(x)) vaWaveform_[osc]=std::max(0,std::min(4,static_cast<int>(std::lround(x)))); }
+void Synth::setVaNoise(int osc, float x) noexcept { if(osc>=0&&osc<3&&std::isfinite(x)) vaNoise_[osc]=clamp01(x); }
+void Synth::setFmFeedback(int osc, float x) noexcept { if(osc>=0&&osc<3&&std::isfinite(x)) fmFeedback_[osc]=clamp01(x); }
+void Synth::setGrainWindow(int osc, float x) noexcept { if(osc>=0&&osc<3&&std::isfinite(x)) grainWindow_[osc]=std::max(0,std::min(3,static_cast<int>(std::lround(x)))); }
 void Synth::setVaPulseWidth(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) vaPulseWidth_[osc] = std::max(0.05f,std::min(x,0.95f)); }
 void Synth::setVaDetune(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) vaDetune_[osc] = std::max(0.0f,std::min(x,1.0f)); }
 void Synth::setFmRatio(int osc, float x) noexcept { if (osc >= 0 && osc < 3 && std::isfinite(x)) fmRatio_[osc] = std::max(0.25f,std::min(x,16.0f)); }
@@ -193,12 +197,20 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
                     const double b = v.phase[osc];
                     const float saw = static_cast<float>(2.0*a-1.0);
                     const float pulse = b < std::max(0.05f,std::min(0.95f,vaPulseWidth_[osc]+matrixVa[osc]*0.45f)) ? 1.0f : -1.0f;
-                    voiceSample += (0.55f*saw+0.45f*pulse)*oscLevel_[osc];
+                    float va = 0.55f*saw+0.45f*pulse;
+                    if(vaWaveform_[osc]==1) va=saw;
+                    else if(vaWaveform_[osc]==2) va=pulse;
+                    else if(vaWaveform_[osc]==3) va=static_cast<float>(1.0-4.0*std::abs(a-0.5));
+                    else if(vaWaveform_[osc]==4) va=static_cast<float>(std::sin(2*pi*a));
+                    v.rng=v.rng*1664525u+1013904223u;
+                    const float noise=static_cast<float>((v.rng>>8)&0xffffffu)/8388608.0f-1.0f;
+                    voiceSample += (va*(1.0f-vaNoise_[osc])+noise*vaNoise_[osc])*oscLevel_[osc];
                     v.vaPhase[osc] += v.phaseStep*vibrato*std::pow(2.0,vaDetune_[osc]/12.0);
                     if (v.vaPhase[osc] >= 1.0) v.vaPhase[osc] -= std::floor(v.vaPhase[osc]);
                 } else if (engineType_[osc] == 3) {
                     // Two-operator FM prototype; full DX7 six-operator engine is pending.
-                    const double mod = std::sin(2.0*pi*v.fmPhase[osc]);
+                    const double mod = std::sin(2.0*pi*v.fmPhase[osc] + fmFeedback_[osc]*v.fmLast[osc]*6.0);
+                    v.fmLast[osc]=static_cast<float>(mod);
                     voiceSample += static_cast<float>(std::sin(2.0*pi*v.phase[osc]+std::max(0.0f,fmIndex_[osc]+matrixFm[osc]*8.0f)*mod))*oscLevel_[osc];
                     v.fmPhase[osc] += v.phaseStep*vibrato*fmRatio_[osc];
                     if (v.fmPhase[osc] >= 1.0) v.fmPhase[osc] -= std::floor(v.fmPhase[osc]);
@@ -219,7 +231,11 @@ void Synth::render(float* left, float* right, std::size_t frames) noexcept {
                     float grains = 0.0f; int active = 0;
                     for (auto& g : v.grains[osc]) if (g.active) {
                         const int idx = (static_cast<int>(std::floor(g.phase)) % kTableSize + kTableSize) % kTableSize;
-                        const float window = 0.5f - 0.5f*std::cos(static_cast<float>(2*pi*g.age / g.length));
+                        const float t=static_cast<float>(g.age)/g.length;
+                        float window=0.5f-0.5f*std::cos(static_cast<float>(2*pi*t));
+                        if(grainWindow_[osc]==1) window=1.0f-std::abs(2.0f*t-1.0f);
+                        else if(grainWindow_[osc]==2) window=std::sin(static_cast<float>(pi*t));
+                        else if(grainWindow_[osc]==3) window=(t<0.1f?t*10.0f:(t>0.9f?(1.0f-t)*10.0f:1.0f));
                         grains += grainSource_[idx] * window;
                         ++active; g.phase += g.step; if (++g.age >= g.length) g.active = false;
                     }
