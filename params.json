@@ -165,7 +165,8 @@
         "SQUARE",
         "TRIANGLE",
         "PULSE",
-        "ORGAN"
+        "ORGAN",
+        "USER WAV"
       ],
       "default": 0
     },
@@ -179,7 +180,8 @@
         "SQUARE",
         "TRIANGLE",
         "PULSE",
-        "ORGAN"
+        "ORGAN",
+        "USER WAV"
       ],
       "default": 0
     },
@@ -193,7 +195,8 @@
         "SQUARE",
         "TRIANGLE",
         "PULSE",
-        "ORGAN"
+        "ORGAN",
+        "USER WAV"
       ],
       "default": 0
     },
@@ -2036,6 +2039,33 @@
       "name": "LFO4 Selected Step",
       "min": 0,
       "max": 15,
+      "default": 0
+    },
+    {
+      "key": "osc1_grain_source",
+      "name": "OSC 1 Grain Source",
+      "options": [
+        "FACTORY",
+        "USER WAV"
+      ],
+      "default": 0
+    },
+    {
+      "key": "osc2_grain_source",
+      "name": "OSC 2 Grain Source",
+      "options": [
+        "FACTORY",
+        "USER WAV"
+      ],
+      "default": 0
+    },
+    {
+      "key": "osc3_grain_source",
+      "name": "OSC 3 Grain Source",
+      "options": [
+        "FACTORY",
+        "USER WAV"
+      ],
       "default": 0
     }
   ]
