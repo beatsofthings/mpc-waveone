@@ -1,0 +1,24 @@
+{
+  "name": "WaveOne",
+  "vendor": "Beats of Things",
+  "uid": "WvO1",
+  "version": 1000,
+  "so": "waveone.so",
+  "params": "params.json",
+  "targets": [
+    "aarch64"
+  ],
+  "build": {
+    "root": ".",
+    "sources": [
+      "src/WaveOne.cpp",
+      "src/mpc_engine.cpp"
+    ],
+    "cflags": [
+      "-Isrc"
+    ],
+    "libs": [
+      "-lm"
+    ]
+  }
+}
